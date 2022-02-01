@@ -1,0 +1,24 @@
+---
+title: "Markdown_Felix"
+author: "Felix Bigler"
+date: "2/1/2022"
+output: html_document
+---
+
+````{r, echo= FALSE}
+# load library
+library(rstudioapi)
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(caret)
+library(GGally)
+library(mgcv)
+```
+
+````{r, echo=FALSE}
+# set directory read data
+setwd(dirname(getActiveDocumentContext()$path))
+df_weather <- read.csv("../data/ninja_weather_47.3927_8.0444_uncorrected.csv",header = TRUE)
+`````
+
