@@ -75,42 +75,38 @@ ggplot(data = df_plantA_resample,
   geom_smooth(method = "gam", color = "cornflowerblue")
 ```
 
-```{r}
-summary(df_plantA_resample
-        )
-```
 
-
-
-
-
-
-tt <- ts(dat$X,start=c(2006,firstHour),frequency=24*365)
 
 #Time Series Analysis
 ```{r}
 library(forecast)
 
 
-ts_1 <- ts(df_plantA_resample$Generation_kW, frequency=1)
-train <- window(ts_1, start = 1, end = 100)
+ts_1 <- ts(log(df_plantA_resample$Generation_kW), start = 2019, end = 2020, frequency = 365)
+train <- window(ts_1, start = c(2019,1), end = c(2019,100))
 fit <- auto.arima(train)
-fc <- predict(fit, n.ahead = 25)
+```
 
+
+```{r}
+fit
+```
+
+
+```{r}
+fc <- predict(fit, n.ahead = 100)
 plot(ts_1, lty=3)
 lines(train, lwd=1)
 lines(fc$pred, lwd=2, col="red")
 lines(fc$pred+fc$se*1.96, col="red")
-lines(fc$pred-fc$se*1.96, col="red")#
+lines(fc$pred-fc$se*1.96, col="red")
 ```
 
 ```{r}
-fit
+decomp<-stl(df_plantA_resample$Generation_kW, s.window = 365)
+plot(decomp)
 ```
 
-```{r}
-fit
-```
 
 
 
