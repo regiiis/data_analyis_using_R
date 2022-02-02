@@ -38,33 +38,19 @@ df_plantC <- read.csv("./data/C.csv",header=TRUE,sep =",",comment.char ="#")
 # Data preparation
 ```{r}
 df_weather$local_time <- as.POSIXct(df_weather$local_time,tz="GMT",format="%Y-%m-%d %H:%M")
-head(df_weather)
-head(df_plantA)
-```
-
-```{r}
 df_plantA$Timestamp <- as.POSIXct(df_plantA$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
 df_plantB$Timestamp <- as.POSIXct(df_plantB$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
 df_plantC$Timestamp <- as.POSIXct(df_plantC$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
-head(df_plantA)
-head(df_plantB)
-head(df_plantC)
+#df_weather %>% rename(datetime = local_time,)
 ```
 
 ```{r}
 df_plantA_resample <- df_plantA %>%
-  mutate(datetime = floor_date(Timestamp, "24 hour")) %>%
+  mutate(datetime = floor_date(Timestamp, "1 hour")) %>%
   group_by(datetime) %>%
   summarise(across(Generation_kW:Overall_Consumption_Calc_kW, sum))
 
 head(df_plantA_resample)
-```
-
-```{r}
-df_weather %>% 
-  rename(
-    datetime = local_time,
-    )
 ```
 
 #Visual analysis
@@ -75,21 +61,19 @@ ggplot(data = df_plantA_resample,
   geom_smooth(method = "gam", color = "cornflowerblue")
 ```
 
-
-
 #Time Series Analysis
 ```{r}
 library(forecast)
 
 
-ts_1 <- ts(log(df_plantA_resample$Generation_kW), start = 2019, end = 2020, frequency = 365)
-train <- window(ts_1, start = c(2019,1), end = c(2019,100))
-fit <- auto.arima(train)
+ts_1 <- ts(log(df_plantA_resample$Generation_kW), frequency = 24)
+train <- window(ts_1, start = 1, end = 2000)
+fit <- auto.arima(ts_1)
 ```
 
 
 ```{r}
-fit
+ts_1
 ```
 
 
