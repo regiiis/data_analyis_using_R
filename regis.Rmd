@@ -1,30 +1,122 @@
 ---
 title: "regis"
-author: "regis"
+author: "regis andreoli"
 date: "1/31/2022"
-output: html_document
+output:
+  html_document:
+    toc: yes
+    toc_float: no
+    toc_depth: 4
+    number_sections: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+````{r, echo= FALSE}
+# load library
+library(rstudioapi)
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(caret)
+library(GGally)
+library(mgcv)
+library(lubridate)
 ```
 
-## R Markdown
+# Load Data
+````{r, echo=FALSE}
+# identify and set directory, then read data from csv
+setwd(dirname(getActiveDocumentContext()$path))
+df_weather <- read.csv("./data/weather.csv",header=TRUE,sep =",",comment.char ="#")
+df_plantA <- read.csv("./data/A.csv",header=TRUE,sep =",",comment.char ="#")
+df_plantB <- read.csv("./data/B.csv",header=TRUE,sep =",",comment.char ="#")
+df_plantC <- read.csv("./data/C.csv",header=TRUE,sep =",",comment.char ="#")
+`````
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+# Data preparation
+```{r}
+df_weather$local_time <- as.POSIXct(df_weather$local_time,tz="GMT",format="%Y-%m-%d %H:%M")
+head(df_weather)
+head(df_plantA)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+df_plantA$Timestamp <- as.POSIXct(df_plantA$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
+df_plantB$Timestamp <- as.POSIXct(df_plantB$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
+df_plantC$Timestamp <- as.POSIXct(df_plantC$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
+head(df_plantA)
+head(df_plantB)
+head(df_plantC)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+df_plantA_resample <- df_plantA %>%
+  mutate(datetime = floor_date(Timestamp, "24 hour")) %>%
+  group_by(datetime) %>%
+  summarise(across(Generation_kW:Overall_Consumption_Calc_kW, sum))
+
+head(df_plantA_resample)
+```
+
+```{r}
+df_weather %>% 
+  rename(
+    datetime = local_time,
+    )
+```
+
+#Visual analysis
+```{r}
+ggplot(data = df_plantA_resample,
+  mapping = aes(y = Generation_kW, x = datetime)) +
+  geom_point(size = 1, color = "grey69") +
+  geom_smooth(method = "gam", color = "cornflowerblue")
+```
+
+```{r}
+summary(df_plantA_resample
+        )
+```
+
+
+
+
+
+
+tt <- ts(dat$X,start=c(2006,firstHour),frequency=24*365)
+
+#Time Series Analysis
+```{r}
+library(forecast)
+
+
+ts_1 <- ts(df_plantA_resample$Generation_kW, frequency=1)
+train <- window(ts_1, start = 1, end = 100)
+fit <- auto.arima(train)
+fc <- predict(fit, n.ahead = 25)
+
+plot(ts_1, lty=3)
+lines(train, lwd=1)
+lines(fc$pred, lwd=2, col="red")
+lines(fc$pred+fc$se*1.96, col="red")
+lines(fc$pred-fc$se*1.96, col="red")#
+```
+
+```{r}
+fit
+```
+
+```{r}
+fit
+```
+
+
+
+
+
+
+
+
+
