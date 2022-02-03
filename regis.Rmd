@@ -50,8 +50,11 @@ df_plantA_resample <- df_plantA %>%
   group_by(datetime) %>%
   summarise(across(Generation_kW:Overall_Consumption_Calc_kW, sum))
 
-head(df_plantA_resample)
+str(df_plantA_resample)
 ```
+
+
+
 
 #Visual analysis
 ```{r}
@@ -61,40 +64,102 @@ ggplot(data = df_plantA_resample,
   geom_smooth(method = "gam", color = "cornflowerblue")
 ```
 
-#Time Series Analysis
+# Time Series Analysis
+
 ```{r}
 library(forecast)
 
+# Convert data set into time series object. As the data has an hourly
+# resolution, the time repetition interval is set to 24, which correspond to a
+# seasonality of one day.
+#
 
-ts_1 <- ts(log(df_plantA_resample$Generation_kW), frequency = 24)
-train <- window(ts_1, start = 1, end = 2000)
-fit <- auto.arima(ts_1)
+ts_1 <- ts((df_plantA_resample$Generation_kW), deltat = 1/24)
+train <- window(ts_1, start = 1, end = 250)
+fit <- auto.arima(train)
 ```
 
-
 ```{r}
-ts_1
+
 ```
 
-
 ```{r}
-fc <- predict(fit, n.ahead = 100)
-plot(ts_1, lty=3)
+fc <- predict(fit, n.ahead = 115*24)
+plot(ts_1, lty=3, size = 0.1)
 lines(train, lwd=1)
-lines(fc$pred, lwd=2, col="red")
-lines(fc$pred+fc$se*1.96, col="red")
-lines(fc$pred-fc$se*1.96, col="red")
+lines(fc$pred, lwd=2, col="red", size = 0.01)
+#lines(fc$pred+fc$se*1.96, col="red")
+#lines(fc$pred-fc$se*1.96, col="red")
 ```
 
 ```{r}
-decomp<-stl(df_plantA_resample$Generation_kW, s.window = 365)
+decomp<-stl(ts_1, s.window = 1/24, t.window = 365)
 plot(decomp)
 ```
 
+# Second Time Series Analysis - Manipulated 
+Some artificial years are added to the time series, to be able to capture seasonal effects (year).
 
+## Data preparation
+```{r}
+df_plantA_resample_2 <- df_plantA %>%
+  mutate(datetime = floor_date(Timestamp, "24 hour")) %>%
+  group_by(datetime) %>%
+  summarise(across(Generation_kW:Overall_Consumption_Calc_kW, sum))
 
+ts_2 <- ts((df_plantA_resample_2$Generation_kW), start = c(2019), deltat = 1/365)
+```
 
+```{r}
+ggplot(data = df_plantA_resample_2,
+  mapping = aes(y = Generation_kW, x = datetime)) +
+  geom_point(size = 1, color = "grey69") +
+  geom_smooth(method = "gam", color = "cornflowerblue")
+```
 
+Add random noise to first time series, in order togenerate new artificial years.
+
+```{r}
+ts_artif_1 <- {jitter(ts_2, factor=500, amount = NULL)}
+ts_artif_2 <- {jitter(ts_2, factor=500, amount = NULL)}
+head(ts_2)
+head(ts_artif_1)
+head(ts_artif_2)
+```
+
+Set negative values to zero, as due to the nature of the data, negative values should't occure.
+```{r}
+ts_artif_1[][ts_artif_1[] < 0] <- 0
+ts_artif_2[][ts_artif_2[] < 0] <- 0
+```
+
+Create time series of several years, starting with real data year and two artificial years.
+```{r}
+ts_artificial <- ts(c(ts_2, ts_artif_1, ts_artif_2), start = c(2019), deltat = 1/365)
+str(ts_artificial)
+```
+```{r}
+decomp<-stl(ts_artificial, s.window = 365)
+plot(decomp)
+```
+
+```{r}
+train_2 <- window(ts_artificial, start = 2019, end = 2020)
+fit_2 <- auto.arima(train_2)
+```
+
+```{r}
+rnorm(365, c(5,100), sd = 1.5)
+```
+
+```{r}
+gam_model <- gam(Generation_kW ~ datetime, data = df_plantA_resample_2, discrete = TRUE)
+```
+
+```{r}
+summary(gam_model)
+gam_model
+```
 
 
 
