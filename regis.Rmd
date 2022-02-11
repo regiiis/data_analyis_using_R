@@ -197,9 +197,9 @@ First, a list of parameter sets is created. This list is then used in a function
 ```{r}
 #create list of parameter sets
 library(BBmisc)
-xi <- c(20:1)/20
-min <- c(1:20)/50
-max <- c(50:70)/40
+xi <- c(25:1)/30
+min <- c(1:50)/100
+max <- c(50:80)/40
 u <- list()
   for (i in xi) {
     for (n in min) {
@@ -216,13 +216,16 @@ get_artificial_list <- function(mean_real_yr, variance_real_yr, gam_prediciton) 
   
   div_mean <- 0
   div_var <- 0
-  i = i
+  i = 1
   treshold_1 <- TRUE
   treshold_2 <- TRUE
   df_sets <- list()
+  m <- (length(u)/3 - 1)
   
   for (n in u) {
-    
+    if (i == m) {
+      break
+    }
     random_coef <- rsnorm(365, mean = 1, sd = 1, xi = as.numeric(u[i,][1]))
     ran_coef_norm <- normalize(random_coef, method = "range", range = c(0, 1))
     ran_coef_norm_2 <- ran_coef_norm * runif(ran_coef_norm, min = as.numeric(u[i,][2]), max = as.numeric(u[i,][3]))
@@ -231,32 +234,47 @@ get_artificial_list <- function(mean_real_yr, variance_real_yr, gam_prediciton) 
     div_mean <- (mean_real_yr / mean(yr_with_noise))
     div_var <- (variance_real_yr / var(yr_with_noise))
        
-    treshold_1 <- (div_mean > 1.05 | div_mean < 0.95)
-    treshold_2 <- (div_var > 1.1 | div_var < 0.9)
+    treshold_1 <- (div_mean < 1.05 && div_mean > 0.95)
+    treshold_2 <- (div_var < 1.05 && div_var > 0.95)
     
-    if (treshold_1 && treshold_2){
-    df_sets <- rbind(df_sets, yr_with_noise)
+    if (treshold_1 && treshold_2) {
+      df_sets <- rbind(df_sets, yr_with_noise)
+      print(i)
+      print(div_mean)
+      print(div_var)
+    }
+    if (i %in% (c(1:100)*100)){
+      print(i)
     }
     
-    print(i)
-    #print(div_mean)
-    #print(div_var)
-    #print(mean(yr_with_noise))
     i <- i + 1
   }
   df_sets
 }
-
 ```
 
-
+Call the function to compute about 40'000 simulated years and and save all one that meet the threshold requirements.
 ```{r}
 mean_real <- mean(df_plantA_resample_2$Generation_kW)
 var_real <- var(df_plantA_resample_2$Generation_kW)
 
 noised_year <- get_artificial_list(mean_real, var_real, gam_prediciton)
-plot(noised_year, cex = 0.1)
 ```
+
+```{r}
+df_artif <- t(noised_year[1,])
+arr <- array(as.numeric(unlist(df_artif)))
+print("Real")
+mean(df_plantA_resample_2$Generation_kW)
+var(df_plantA_resample_2$Generation_kW)
+print("Artif")
+mean(arr)
+var(arr)
+plot(arr, cex = .2)
+hist(df_plantA_resample_2$Generation_kW)
+hist(arr)
+```
+
 
 
 
