@@ -234,7 +234,7 @@ get_artificial_list <- function(mean_real_yr, variance_real_yr, gam_prediciton) 
     div_mean <- (mean_real_yr / mean(yr_with_noise))
     div_var <- (variance_real_yr / var(yr_with_noise))
        
-    treshold_1 <- (div_mean < 1.05 && div_mean > 0.95)
+    treshold_1 <- (div_mean < 1.00 && div_mean > 0.95)
     treshold_2 <- (div_var < 1.05 && div_var > 0.95)
     
     if (treshold_1 && treshold_2) {
@@ -243,7 +243,7 @@ get_artificial_list <- function(mean_real_yr, variance_real_yr, gam_prediciton) 
       print(div_mean)
       print(div_var)
     }
-    if (i %in% (c(1:100)*100)){
+    if (i %in% (c(1:1000)*100)){
       print(i)
     }
     
