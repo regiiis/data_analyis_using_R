@@ -212,7 +212,7 @@ u <- list()
 ```
 
 ```{r}
-get_artificial_list <- function(mean_real_yr, variance_real_yr, gam_prediciton) {
+get_artificial_years <- function(mean_real_yr, variance_real_yr, gam_prediciton) {
   
   div_mean <- 0
   div_var <- 0
@@ -258,7 +258,7 @@ Call the function to compute about 40'000 simulated years and and save all one t
 mean_real <- mean(df_plantA_resample_2$Generation_kW)
 var_real <- var(df_plantA_resample_2$Generation_kW)
 
-noised_year <- get_artificial_list(mean_real, var_real, gam_prediciton)
+noised_year <- get_artificial_years(mean_real, var_real, gam_prediciton)
 ```
 
 ```{r}
