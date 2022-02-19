@@ -1,0 +1,1039 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\title{regis}
+\author{regis andreoli}
+\date{1/31/2022}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={regis},
+  pdfauthor={regis andreoli},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{4}
+\tableofcontents
+}
+\hypertarget{load-library}{%
+\section{load library}\label{load-library}}
+
+\begin{verbatim}
+## Warning: package 'knitr' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'rstudioapi' was built under R version 4.0.3
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'ggplot2' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'gridExtra' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'dplyr' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:gridExtra':
+## 
+##     combine
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'caret' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: lattice
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'lattice' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'GGally' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Registered S3 method overwritten by 'GGally':
+##   method from   
+##   +.gg   ggplot2
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'mgcv' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: nlme
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'nlme' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'nlme'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:dplyr':
+## 
+##     collapse
+\end{verbatim}
+
+\begin{verbatim}
+## This is mgcv 1.8-38. For overview type 'help("mgcv-package")'.
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'lubridate' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'lubridate'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     date, intersect, setdiff, union
+\end{verbatim}
+
+\hypertarget{load-data}{%
+\section{Load Data}\label{load-data}}
+
+\hypertarget{data-preparation}{%
+\section{Data preparation}\label{data-preparation}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_weather}\SpecialCharTok{$}\NormalTok{local\_time }\OtherTok{\textless{}{-}} \FunctionTok{as.POSIXct}\NormalTok{(df\_weather}\SpecialCharTok{$}\NormalTok{local\_time,}\AttributeTok{tz=}\StringTok{"GMT"}\NormalTok{,}\AttributeTok{format=}\StringTok{"\%Y{-}\%m{-}\%d \%H:\%M"}\NormalTok{)}
+\NormalTok{df\_plantA}\SpecialCharTok{$}\NormalTok{Timestamp }\OtherTok{\textless{}{-}} \FunctionTok{as.POSIXct}\NormalTok{(df\_plantA}\SpecialCharTok{$}\NormalTok{Timestamp,}\AttributeTok{tz=}\StringTok{"GMT"}\NormalTok{,}\AttributeTok{format=}\StringTok{"\%Y{-}\%m{-}\%d \%H:\%M:\%S"}\NormalTok{)}
+\NormalTok{df\_plantB}\SpecialCharTok{$}\NormalTok{Timestamp }\OtherTok{\textless{}{-}} \FunctionTok{as.POSIXct}\NormalTok{(df\_plantB}\SpecialCharTok{$}\NormalTok{Timestamp,}\AttributeTok{tz=}\StringTok{"GMT"}\NormalTok{,}\AttributeTok{format=}\StringTok{"\%Y{-}\%m{-}\%d \%H:\%M:\%S"}\NormalTok{)}
+\NormalTok{df\_plantC}\SpecialCharTok{$}\NormalTok{Timestamp }\OtherTok{\textless{}{-}} \FunctionTok{as.POSIXct}\NormalTok{(df\_plantC}\SpecialCharTok{$}\NormalTok{Timestamp,}\AttributeTok{tz=}\StringTok{"GMT"}\NormalTok{,}\AttributeTok{format=}\StringTok{"\%Y{-}\%m{-}\%d \%H:\%M:\%S"}\NormalTok{)}
+\CommentTok{\#df\_weather \%\textgreater{}\% rename(datetime = local\_time,)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_plantA\_resample }\OtherTok{\textless{}{-}}\NormalTok{ df\_plantA }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{datetime =} \FunctionTok{floor\_date}\NormalTok{(Timestamp, }\StringTok{"1 hour"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(datetime) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\FunctionTok{across}\NormalTok{(Generation\_kW}\SpecialCharTok{:}\NormalTok{Overall\_Consumption\_Calc\_kW, sum))}
+
+\FunctionTok{str}\NormalTok{(df\_plantA\_resample)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## tibble [8,760 x 5] (S3: tbl_df/tbl/data.frame)
+##  $ datetime                   : POSIXct[1:8760], format: "2019-01-01 00:00:00" "2019-01-01 01:00:00" ...
+##  $ Generation_kW              : num [1:8760] 0 0 0 0 0 ...
+##  $ Grid_Feed.In_kW            : num [1:8760] 0 0 0 0 0 0 0 0 0 0 ...
+##  $ Grid_Supply_kW             : num [1:8760] 16.9 16.8 17.5 16.9 17.5 ...
+##  $ Overall_Consumption_Calc_kW: num [1:8760] 16.9 16.8 17.5 16.9 17.5 ...
+\end{verbatim}
+
+\hypertarget{visual-analysis}{%
+\section{Visual analysis}\label{visual-analysis}}
+
+First visual analysis of the data. The Graph is Supported by a GAM
+smoother.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =}\NormalTok{ df\_plantA\_resample,}
+  \AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{y =}\NormalTok{ Generation\_kW, }\AttributeTok{x =}\NormalTok{ datetime)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{size =} \DecValTok{1}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey69"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"gam"}\NormalTok{, }\AttributeTok{color =} \StringTok{"cornflowerblue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula 'y ~ s(x, bs = "cs")'
+\end{verbatim}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\hypertarget{time-series-analysis---with-auto.arima}{%
+\section{Time Series Analysis - with
+auto.arima}\label{time-series-analysis---with-auto.arima}}
+
+Convert data into time series object. As the data has an hourly
+resolution, the time interval is set to 24, which correspond in this
+case to a seasonality of one day.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(forecast)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'forecast' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Registered S3 method overwritten by 'quantmod':
+##   method            from
+##   as.zoo.data.frame zoo
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'forecast'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:nlme':
+## 
+##     getResponse
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ts\_1 }\OtherTok{\textless{}{-}} \FunctionTok{ts}\NormalTok{((df\_plantA\_resample}\SpecialCharTok{$}\NormalTok{Generation\_kW), }\AttributeTok{deltat =} \DecValTok{1}\SpecialCharTok{/}\DecValTok{24}\NormalTok{)}
+\NormalTok{train }\OtherTok{\textless{}{-}} \FunctionTok{window}\NormalTok{(ts\_1, }\AttributeTok{start =} \DecValTok{1}\NormalTok{, }\AttributeTok{end =} \DecValTok{250}\NormalTok{)}
+\NormalTok{fit }\OtherTok{\textless{}{-}} \FunctionTok{auto.arima}\NormalTok{(train)}
+\end{Highlighting}
+\end{Shaded}
+
+Plot the time series with the prediction.
+\includegraphics{regis_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+Plot the time series again, but with a focus on the prediction area. As
+it is to see, the model prediction has some noticable, small variation
+in the first five days. Then, it converge to value which is a bit
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fc }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(fit, }\AttributeTok{n.ahead =} \DecValTok{115}\SpecialCharTok{*}\DecValTok{24}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(ts\_1, }\AttributeTok{lty=}\DecValTok{3}\NormalTok{, }\AttributeTok{cex =} \FloatTok{0.1}\NormalTok{, }\AttributeTok{xlim=}\FunctionTok{c}\NormalTok{(}\DecValTok{240}\NormalTok{, }\DecValTok{270}\NormalTok{), }\AttributeTok{ylim=}\FunctionTok{c}\NormalTok{(}\DecValTok{25}\NormalTok{, }\DecValTok{125}\NormalTok{))}
+\FunctionTok{lines}\NormalTok{(train, }\AttributeTok{lwd=}\DecValTok{1}\NormalTok{)}
+\FunctionTok{lines}\NormalTok{(fc}\SpecialCharTok{$}\NormalTok{pred, }\AttributeTok{lwd=}\DecValTok{2}\NormalTok{, }\AttributeTok{col=}\StringTok{"red"}\NormalTok{, }\AttributeTok{cex =} \FloatTok{0.1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(df\_plantA\_resample}\SpecialCharTok{$}\NormalTok{Generation\_kW[df\_plantA\_resample}\SpecialCharTok{$}\NormalTok{Generation\_kW }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 53.46822
+\end{verbatim}
+
+Plot the decomposition of the time series with the function stl().
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{decomp}\OtherTok{\textless{}{-}}\FunctionTok{stl}\NormalTok{(ts\_1, }\AttributeTok{s.window =} \DecValTok{1}\SpecialCharTok{/}\DecValTok{24}\NormalTok{, }\AttributeTok{t.window =} \DecValTok{365}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(decomp)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+\hypertarget{second-time-series-analysis---manipulated-data}{%
+\section{Second Time Series Analysis - Manipulated
+Data}\label{second-time-series-analysis---manipulated-data}}
+
+Some artificial years are added to the time series, to be able to
+capture the seasonal effect over the entire year.
+
+\hypertarget{data-preparation-1}{%
+\subsection{Data preparation}\label{data-preparation-1}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_plantA\_resample\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_plantA }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{datetime =} \FunctionTok{floor\_date}\NormalTok{(Timestamp, }\StringTok{"24 hour"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(datetime) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\FunctionTok{across}\NormalTok{(Generation\_kW}\SpecialCharTok{:}\NormalTok{Overall\_Consumption\_Calc\_kW, sum))}
+
+\NormalTok{ts\_2 }\OtherTok{\textless{}{-}} \FunctionTok{ts}\NormalTok{((df\_plantA\_resample\_2}\SpecialCharTok{$}\NormalTok{Generation\_kW), }\AttributeTok{start =} \FunctionTok{c}\NormalTok{(}\DecValTok{2019}\NormalTok{), }\AttributeTok{deltat =} \DecValTok{1}\SpecialCharTok{/}\DecValTok{365}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Plot time series of one year with a gam smoother.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =}\NormalTok{ df\_plantA\_resample\_2,}
+  \AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{y =}\NormalTok{ Generation\_kW, }\AttributeTok{x =}\NormalTok{ datetime)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{size =} \DecValTok{1}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey69"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"gam"}\NormalTok{, }\AttributeTok{color =} \StringTok{"cornflowerblue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula 'y ~ s(x, bs = "cs")'
+\end{verbatim}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+Add random noise to first time series, in order to generate new
+artificial years.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ts\_artif\_1 }\OtherTok{\textless{}{-}}\NormalTok{ \{}\FunctionTok{jitter}\NormalTok{(ts\_2, }\AttributeTok{factor=}\DecValTok{500}\NormalTok{, }\AttributeTok{amount =} \ConstantTok{NULL}\NormalTok{)\}}
+\NormalTok{ts\_artif\_2 }\OtherTok{\textless{}{-}}\NormalTok{ \{}\FunctionTok{jitter}\NormalTok{(ts\_2, }\AttributeTok{factor=}\DecValTok{500}\NormalTok{, }\AttributeTok{amount =} \ConstantTok{NULL}\NormalTok{)\}}
+\FunctionTok{head}\NormalTok{(ts\_2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Time Series:
+## Start = c(2019, 1) 
+## End = c(2019, 6) 
+## Frequency = 365 
+## [1]  71.260 226.412 193.904 242.044   1.248   4.432
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(ts\_artif\_1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Time Series:
+## Start = c(2019, 1) 
+## End = c(2019, 6) 
+## Frequency = 365 
+## [1] 118.051444 287.398605 165.942028 341.543229   2.641113 -86.668606
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(ts\_artif\_2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Time Series:
+## Start = c(2019, 1) 
+## End = c(2019, 6) 
+## Frequency = 365 
+## [1]  67.658389 225.880971 140.546870 219.716740 -90.867181   1.136566
+\end{verbatim}
+
+Set negative values to zero, as due to the nature of the data, negative
+values cannot occur.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ts\_artif\_1[][ts\_artif\_1[] }\SpecialCharTok{\textless{}} \DecValTok{0}\NormalTok{] }\OtherTok{\textless{}{-}} \DecValTok{0}
+\NormalTok{ts\_artif\_2[][ts\_artif\_2[] }\SpecialCharTok{\textless{}} \DecValTok{0}\NormalTok{] }\OtherTok{\textless{}{-}} \DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+Create time series of several years, starting with real data year and
+followed by two artificial years. A TS decomposition is then plotted via
+the function stl().
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ts\_artificial }\OtherTok{\textless{}{-}} \FunctionTok{ts}\NormalTok{(}\FunctionTok{c}\NormalTok{(ts\_2, ts\_artif\_1, ts\_artif\_2), }\AttributeTok{start =} \FunctionTok{c}\NormalTok{(}\DecValTok{2019}\NormalTok{), }\AttributeTok{deltat =} \DecValTok{1}\SpecialCharTok{/}\DecValTok{365}\NormalTok{)}
+\NormalTok{decomp}\OtherTok{\textless{}{-}}\FunctionTok{stl}\NormalTok{(ts\_artificial, }\AttributeTok{s.window =} \DecValTok{365}\NormalTok{)}
+\FunctionTok{str}\NormalTok{(ts\_artificial)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  Time-Series [1:1095] from 2019 to 2022: 71.26 226.41 193.9 242.04 1.25 ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot}\NormalTok{(decomp)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+Train model with the first two years of the time series. To train the
+model, the auto.arima function is made use of.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ts\_artificial\_a }\OtherTok{\textless{}{-}} \FunctionTok{ts}\NormalTok{(}\FunctionTok{c}\NormalTok{(ts\_2, ts\_artif\_1, ts\_artif\_2), }\AttributeTok{start =} \FunctionTok{c}\NormalTok{(}\DecValTok{2019}\NormalTok{), }\AttributeTok{frequency =} \DecValTok{365}\NormalTok{)}
+
+\NormalTok{train\_2 }\OtherTok{\textless{}{-}} \FunctionTok{window}\NormalTok{(ts\_artificial\_a, }\AttributeTok{start =} \FunctionTok{c}\NormalTok{(}\DecValTok{2019}\NormalTok{,}\DecValTok{1}\NormalTok{), }\AttributeTok{end =} \FunctionTok{c}\NormalTok{(}\DecValTok{2020}\NormalTok{,}\DecValTok{365}\NormalTok{))}
+\NormalTok{fit\_2 }\OtherTok{\textless{}{-}} \FunctionTok{auto.arima}\NormalTok{(train\_2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: The chosen seasonal unit root test encountered an error when testing for the first difference.
+## From stl(): series is not periodic or has less than two periods
+## 0 seasonal differences will be used. Consider using a different unit root test.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{arima\_prediciton }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(fit\_2, }\AttributeTok{n.ahead =} \DecValTok{100}\NormalTok{)}
+
+\FunctionTok{plot}\NormalTok{(ts\_artificial\_a, }\AttributeTok{cex =} \FloatTok{0.1}\NormalTok{)}
+\FunctionTok{lines}\NormalTok{(train\_2)}
+\FunctionTok{lines}\NormalTok{(arima\_prediciton}\SpecialCharTok{$}\NormalTok{pred, }\AttributeTok{col =} \StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-15-1.pdf}
+
+\hypertarget{artificial-time-series---new-attemp-use-of-gam-smoother-as-base-for-an-artificial-year-and-add-normally-distributed-noise.}{%
+\section{Artificial time series - new attemp: use of gam smoother as
+base for an artificial year and add normally distributed
+noise.}\label{artificial-time-series---new-attemp-use-of-gam-smoother-as-base-for-an-artificial-year-and-add-normally-distributed-noise.}}
+
+Create new data frame with indexed data. This is done to avoid date
+handling
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_artif }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{time =}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{:}\DecValTok{365}\NormalTok{), }\AttributeTok{generation\_kw =}\NormalTok{ df\_plantA\_resample\_2}\SpecialCharTok{$}\NormalTok{Generation\_kW)}
+\end{Highlighting}
+\end{Shaded}
+
+Compute a smoother line function with the new data frame
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gam\_model }\OtherTok{\textless{}{-}} \FunctionTok{gam}\NormalTok{(generation\_kw }\SpecialCharTok{\textasciitilde{}} \FunctionTok{s}\NormalTok{(time), }\AttributeTok{data =}\NormalTok{ df\_artif)}
+\end{Highlighting}
+\end{Shaded}
+
+Get the discrete steps from the smoother line by computing prediction in
+the desired step interval. The result is plotted to visually control the
+results. As shown below, the data frame plot is, at least qualitatively,
+very similar to the ggplot gam smoother line. This result will now be
+taken as smoothed year.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_time }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{time =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{365}\NormalTok{))}
+\NormalTok{gam\_prediciton }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(gam\_model, }\AttributeTok{newdata =}\NormalTok{ df\_time)}
+\FunctionTok{plot}\NormalTok{(gam\_prediciton, }\AttributeTok{cex =} \FloatTok{0.1}\NormalTok{, )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-19-1.pdf} After
+the creation of an artificial ``smoothed'' year, noise is added. In
+order to keep the heteroskedastic behavior of the real data, the noise
+is added as a multiplication of a random coefficient. After trying
+around, the random coefficient are created with values between 0.2 to 1.
+A quick look at the plot show a satisfying result.
+
+Add noise to smoothed base year
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(BBmisc)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'BBmisc' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'BBmisc'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:nlme':
+## 
+##     collapse
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:dplyr':
+## 
+##     coalesce, collapse
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:base':
+## 
+##     isFALSE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(fGarch)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'fGarch' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: timeDate
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'timeDate' was built under R version 4.0.3
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: timeSeries
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'timeSeries' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: fBasics
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'fBasics' was built under R version 4.0.5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{4}\NormalTok{)}
+\NormalTok{random\_coef }\OtherTok{\textless{}{-}} \FunctionTok{rsnorm}\NormalTok{(}\DecValTok{365}\NormalTok{, }\AttributeTok{mean =} \DecValTok{1}\NormalTok{, }\AttributeTok{sd =} \DecValTok{1}\NormalTok{, }\AttributeTok{xi =} \FloatTok{0.1}\NormalTok{)}
+\NormalTok{ran\_coef\_norm }\OtherTok{\textless{}{-}} \FunctionTok{normalize}\NormalTok{(random\_coef, }\AttributeTok{method =} \StringTok{"range"}\NormalTok{, }\AttributeTok{range =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+\CommentTok{\#ran\_coef\_norm \textless{}{-} ran\_coef\_norm * 1.3}
+\NormalTok{ran\_coef\_norm\_2 }\OtherTok{\textless{}{-}}\NormalTok{ ran\_coef\_norm }\SpecialCharTok{*} \FunctionTok{runif}\NormalTok{(ran\_coef\_norm, }\AttributeTok{min =} \FloatTok{0.3}\NormalTok{, }\AttributeTok{max =} \FloatTok{1.6}\NormalTok{)}
+\NormalTok{gam\_yr\_with\_noise }\OtherTok{\textless{}{-}}\NormalTok{ gam\_prediciton }\SpecialCharTok{*}\NormalTok{ ran\_coef\_norm\_2}
+
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+
+\FunctionTok{print}\NormalTok{(}\StringTok{"df\_plantA\_resample\_2$Generation\_kW"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "df_plantA_resample_2$Generation_kW"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(df\_plantA\_resample\_2}\SpecialCharTok{$}\NormalTok{Generation\_kW)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 684.2468
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{median}\NormalTok{(df\_plantA\_resample\_2}\SpecialCharTok{$}\NormalTok{Generation\_kW)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 643.164
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(df\_plantA\_resample\_2}\SpecialCharTok{$}\NormalTok{Generation\_kW, }\AttributeTok{breaks =} \DecValTok{11}\NormalTok{)}
+
+\FunctionTok{print}\NormalTok{(}\StringTok{""}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] ""
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(}\StringTok{"gam\_prediciton"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "gam_prediciton"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(gam\_prediciton)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 684.2468
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{median}\NormalTok{(gam\_prediciton)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 746.8579
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(gam\_prediciton, }\AttributeTok{breaks =} \DecValTok{11}\NormalTok{)}
+
+\FunctionTok{print}\NormalTok{(}\StringTok{""}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] ""
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(}\StringTok{"gam\_yr\_with\_noise"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "gam_yr_with_noise"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(ran\_coef\_norm\_2)}
+\FunctionTok{mean}\NormalTok{(gam\_yr\_with\_noise)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 504.5858
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{median}\NormalTok{(gam\_yr\_with\_noise)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 402.1255
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot}\NormalTok{(gam\_yr\_with\_noise, }\AttributeTok{cex =} \FloatTok{0.2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-20-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(gam\_yr\_with\_noise, }\AttributeTok{breaks =} \DecValTok{11}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-20-2.pdf}
+
+While the artificial year visually looks satisfying, the mean generally
+is too low. It is not easy to change the noise parameters in such a way,
+that the variance and the mean of the artificial year gets near a
+similar value of the real data. Therefore, a function is create which
+aims to find the best parameter setting:
+
+First, a list of parameter sets is created. This list is then used in a
+function that loops through the list and creates for each set a noised
+year. The noised year is then compared with the real year by its mean
+and variance. A threshold for mean and variance is set. As soon as the
+thresholds are cumulatively fulfilled, the function stops and passed the
+noised year as an output of the function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#create list of parameter sets}
+\FunctionTok{library}\NormalTok{(BBmisc)}
+\NormalTok{xi }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{25}\SpecialCharTok{:}\DecValTok{1}\NormalTok{)}\SpecialCharTok{/}\DecValTok{30}
+\NormalTok{min }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{50}\NormalTok{)}\SpecialCharTok{/}\DecValTok{100}
+\NormalTok{max }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{60}\SpecialCharTok{:}\DecValTok{90}\NormalTok{)}\SpecialCharTok{/}\DecValTok{40}
+\NormalTok{u }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in}\NormalTok{ xi) \{}
+    \ControlFlowTok{for}\NormalTok{ (n }\ControlFlowTok{in}\NormalTok{ min) \{}
+      \ControlFlowTok{for}\NormalTok{ (q }\ControlFlowTok{in}\NormalTok{ max) \{}
+\NormalTok{        o }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(i, n, q)}
+\NormalTok{        u }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(u,o)}
+\NormalTok{      \}}
+\NormalTok{    \}}
+\NormalTok{  \}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{get\_artificial\_years }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(mean\_real\_yr, variance\_real\_yr, gam\_prediciton) \{}
+  
+\NormalTok{  div\_mean }\OtherTok{\textless{}{-}} \DecValTok{0}
+\NormalTok{  div\_var }\OtherTok{\textless{}{-}} \DecValTok{0}
+\NormalTok{  i }\OtherTok{=} \DecValTok{1}
+\NormalTok{  treshold\_1 }\OtherTok{\textless{}{-}} \ConstantTok{TRUE}
+\NormalTok{  treshold\_2 }\OtherTok{\textless{}{-}} \ConstantTok{TRUE}
+\NormalTok{  df\_sets }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+\NormalTok{  m }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{length}\NormalTok{(u)}\SpecialCharTok{/}\DecValTok{3} \SpecialCharTok{{-}} \DecValTok{1}\NormalTok{)}
+  
+  \ControlFlowTok{for}\NormalTok{ (n }\ControlFlowTok{in}\NormalTok{ u) \{}
+    \ControlFlowTok{if}\NormalTok{ (i }\SpecialCharTok{==}\NormalTok{ m) \{}
+      \ControlFlowTok{break}
+\NormalTok{    \}}
+\NormalTok{    random\_coef }\OtherTok{\textless{}{-}} \FunctionTok{rsnorm}\NormalTok{(}\DecValTok{365}\NormalTok{, }\AttributeTok{mean =} \DecValTok{1}\NormalTok{, }\AttributeTok{sd =} \DecValTok{1}\NormalTok{, }\AttributeTok{xi =} \FunctionTok{as.numeric}\NormalTok{(u[i,][}\DecValTok{1}\NormalTok{]))}
+\NormalTok{    ran\_coef\_norm }\OtherTok{\textless{}{-}} \FunctionTok{normalize}\NormalTok{(random\_coef, }\AttributeTok{method =} \StringTok{"range"}\NormalTok{, }\AttributeTok{range =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+\NormalTok{    ran\_coef\_norm\_2 }\OtherTok{\textless{}{-}}\NormalTok{ ran\_coef\_norm }\SpecialCharTok{*} \FunctionTok{runif}\NormalTok{(ran\_coef\_norm, }\AttributeTok{min =} \FunctionTok{as.numeric}\NormalTok{(u[i,][}\DecValTok{2}\NormalTok{]), }\AttributeTok{max =} \FunctionTok{as.numeric}\NormalTok{(u[i,][}\DecValTok{3}\NormalTok{]))}
+
+\NormalTok{    yr\_with\_noise }\OtherTok{\textless{}{-}}\NormalTok{ gam\_prediciton }\SpecialCharTok{*}\NormalTok{ ran\_coef\_norm\_2}
+\NormalTok{    div\_mean }\OtherTok{\textless{}{-}}\NormalTok{ (mean\_real\_yr }\SpecialCharTok{/} \FunctionTok{mean}\NormalTok{(yr\_with\_noise))}
+\NormalTok{    div\_var }\OtherTok{\textless{}{-}}\NormalTok{ (variance\_real\_yr }\SpecialCharTok{/} \FunctionTok{var}\NormalTok{(yr\_with\_noise))}
+       
+\NormalTok{    treshold\_1 }\OtherTok{\textless{}{-}}\NormalTok{ (div\_mean }\SpecialCharTok{\textless{}} \FloatTok{1.025}  \SpecialCharTok{\&\&}\NormalTok{ div\_mean }\SpecialCharTok{\textgreater{}} \FloatTok{0.95}\NormalTok{)}
+\NormalTok{    treshold\_2 }\OtherTok{\textless{}{-}}\NormalTok{ (div\_var }\SpecialCharTok{\textless{}} \FloatTok{1.05} \SpecialCharTok{\&\&}\NormalTok{ div\_var }\SpecialCharTok{\textgreater{}} \FloatTok{0.95}\NormalTok{)}
+    
+    \ControlFlowTok{if}\NormalTok{ (treshold\_1 }\SpecialCharTok{\&\&}\NormalTok{ treshold\_2) \{}
+\NormalTok{      df\_sets }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(df\_sets, yr\_with\_noise)}
+      \FunctionTok{print}\NormalTok{(i)}
+      \FunctionTok{print}\NormalTok{(div\_mean)}
+      \FunctionTok{print}\NormalTok{(div\_var)}
+\NormalTok{    \}}
+    \ControlFlowTok{if}\NormalTok{ (i }\SpecialCharTok{\%in\%}\NormalTok{ (}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{1000}\NormalTok{)}\SpecialCharTok{*}\DecValTok{500}\NormalTok{))\{}
+      \FunctionTok{print}\NormalTok{(i)}
+\NormalTok{    \}}
+    
+\NormalTok{    i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{+} \DecValTok{1}
+\NormalTok{  \}}
+\NormalTok{  df\_sets}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Call the function to compute about 40'000 simulated years and and save
+all one that meet the threshold requirements.
+
+\begin{verbatim}
+## [1] 500
+## [1] 1000
+## [1] 1500
+## [1] 2000
+## [1] 2500
+## [1] 3000
+## [1] 3500
+## [1] 4000
+## [1] 4500
+## [1] 5000
+## [1] 5500
+## [1] 6000
+## [1] 6500
+## [1] 7000
+## [1] 7500
+## [1] 8000
+## [1] 8500
+## [1] 9000
+## [1] 9500
+## [1] 10000
+## [1] 10500
+## [1] 11000
+## [1] 11500
+## [1] 12000
+## [1] 12500
+## [1] 13000
+## [1] 13500
+## [1] 14000
+## [1] 14500
+## [1] 15000
+## [1] 15498
+## [1] 0.9998943
+## [1] 0.9574415
+## [1] 15500
+## [1] 16000
+## [1] 16500
+## [1] 17000
+## [1] 17500
+## [1] 18000
+## [1] 18500
+## [1] 19000
+## [1] 19500
+## [1] 20000
+## [1] 20500
+## [1] 21000
+## [1] 21500
+## [1] 22000
+## [1] 22500
+## [1] 23000
+## [1] 23500
+## [1] 24000
+## [1] 24500
+## [1] 25000
+## [1] 25500
+## [1] 26000
+## [1] 26500
+## [1] 27000
+## [1] 27500
+## [1] 28000
+## [1] 28500
+## [1] 29000
+## [1] 29500
+## [1] 30000
+## [1] 30500
+## [1] 31000
+## [1] 31500
+## [1] 32000
+## [1] 32421
+## [1] 1.018895
+## [1] 0.9638508
+## [1] 32500
+## [1] 33000
+## [1] 33500
+## [1] 34000
+## [1] 34500
+## [1] 35000
+## [1] 35500
+## [1] 35515
+## [1] 1.022846
+## [1] 0.9602693
+## [1] 35637
+## [1] 1.019101
+## [1] 0.9542123
+## [1] 36000
+## [1] 36500
+## [1] 37000
+## [1] 37500
+## [1] 38000
+## [1] 38500
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_artif }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(noised\_year[}\DecValTok{2}\NormalTok{,])}
+\NormalTok{arr }\OtherTok{\textless{}{-}} \FunctionTok{array}\NormalTok{(}\FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(df\_artif)))}
+\FunctionTok{print}\NormalTok{(}\StringTok{"Real"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Real"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(df\_plantA\_resample\_2}\SpecialCharTok{$}\NormalTok{Generation\_kW)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 684.2468
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{var}\NormalTok{(df\_plantA\_resample\_2}\SpecialCharTok{$}\NormalTok{Generation\_kW)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 232351.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(}\StringTok{"Artif"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Artif"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(arr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 671.5576
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{var}\NormalTok{(arr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 241065.6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot}\NormalTok{(arr, }\AttributeTok{cex =}\NormalTok{ .}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(df\_plantA\_resample\_2}\SpecialCharTok{$}\NormalTok{Generation\_kW)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-24-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(arr)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-24-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ts\_artificial\_2 }\OtherTok{\textless{}{-}} \FunctionTok{ts}\NormalTok{(}\FunctionTok{c}\NormalTok{(noised\_year[}\DecValTok{1}\NormalTok{,], noised\_year[}\DecValTok{2}\NormalTok{,], noised\_year[}\DecValTok{3}\NormalTok{,], noised\_year[}\DecValTok{4}\NormalTok{,]), }\AttributeTok{start =} \FunctionTok{c}\NormalTok{(}\DecValTok{2019}\NormalTok{), }\AttributeTok{deltat =} \DecValTok{1}\SpecialCharTok{/}\DecValTok{365}\NormalTok{)}
+\NormalTok{decomp\_2 }\OtherTok{\textless{}{-}} \FunctionTok{stl}\NormalTok{(ts\_artificial\_2, }\AttributeTok{s.window =} \DecValTok{1}\SpecialCharTok{/}\DecValTok{24}\NormalTok{, }\AttributeTok{t.window =} \DecValTok{365}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(decomp\_2)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{regis_files/figure-latex/unnamed-chunk-25-1.pdf}
+
+\#\texttt{\{r\}\ ts\_artificial\_3\ \textless{}-\ ts(c(noised\_year{[}1,{]},\ noised\_year{[}2,{]},\ noised\_year{[}3,{]},\ noised\_year{[}4,{]},\ noised\_year{[}5,{]}),\ start\ =\ c(2019),\ deltat\ =\ 1/365)\ train\_2\ \textless{}-\ window(ts\_artificial\_3,\ start\ =\ 2019,\ end\ =\ 2024)\ fit\ \textless{}-\ auto.arima(train\_2)}
+
+Plot the time series with the prediction.
+\#\texttt{\{r\}\ fc\ \textless{}-\ predict(fit,\ n.ahead\ =\ 115*24)\ plot(ts\_1,\ lty=3,\ size\ =\ 0.1)\ lines(train,\ lwd=1)\ lines(fc\$pred,\ lwd=2,\ col="red",\ size\ =\ 0.01)\ \#lines(fc\$pred+fc\$se*1.96,\ col="red")\ \#lines(fc\$pred-fc\$se*1.96,\ col="red")}
+
+\end{document}

@@ -1,5 +1,5 @@
 ---
-title: "regis"
+title: "regis_r_bootcamp"
 author: "regis andreoli"
 date: "1/31/2022"
 output:
@@ -11,11 +11,14 @@ output:
     toc_float: no
     toc_depth: 4
     number_sections: yes
+  word_document:
+    toc: yes
+    toc_depth: '4'
 ---
 
 # load library
-````{r, echo= FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+knitr::opts_chunk$set(echo = TRUE, error=FALSE, warning=FALSE)
 library(knitr)
 library(rstudioapi)
 library(ggplot2)
@@ -28,14 +31,14 @@ library(lubridate)
 ```
 
 # Load Data
-````{r, echo=FALSE}
+```{r}
 # identify and set directory, then read data from csv
 setwd(dirname(getActiveDocumentContext()$path))
 df_weather <- read.csv("./data/weather.csv",header=TRUE,sep =",",comment.char ="#")
 df_plantA <- read.csv("./data/A.csv",header=TRUE,sep =",",comment.char ="#")
 df_plantB <- read.csv("./data/B.csv",header=TRUE,sep =",",comment.char ="#")
 df_plantC <- read.csv("./data/C.csv",header=TRUE,sep =",",comment.char ="#")
-`````
+```
 
 # Data preparation
 ```{r}
@@ -281,7 +284,7 @@ get_artificial_years <- function(mean_real_yr, variance_real_yr, gam_prediciton)
 ```
 
 Call the function to compute about 40'000 simulated years and and save all one that meet the threshold requirements.
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}}
 mean_real <- mean(df_plantA_resample_2$Generation_kW)
 var_real <- var(df_plantA_resample_2$Generation_kW)
 
