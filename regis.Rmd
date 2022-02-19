@@ -3,18 +3,18 @@ title: "regis"
 author: "regis andreoli"
 date: "1/31/2022"
 output:
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
   html_document:
     toc: yes
     toc_float: no
     toc_depth: 4
     number_sections: yes
-  pdf_document:
-    toc: yes
-    toc_depth: '4'
 ---
 
-````{r, echo= FALSE}
 # load library
+````{r, echo= FALSE}
 library(rstudioapi)
 library(ggplot2)
 library(gridExtra)
@@ -53,8 +53,8 @@ df_plantA_resample <- df_plantA %>%
 str(df_plantA_resample)
 ```
 
-#Visual analysis
-First visual analysis of the data. complemented by a gam smoother.
+# Visual analysis
+First visual analysis of the data. The Graph is Supported by a GAM smoother.
 ```{r}
 ggplot(data = df_plantA_resample,
   mapping = aes(y = Generation_kW, x = datetime)) +
@@ -62,8 +62,8 @@ ggplot(data = df_plantA_resample,
   geom_smooth(method = "gam", color = "cornflowerblue")
 ```
 
-# Time Series Analysis
-Convert data set into time series object. As the data has an hourly resolution, the time repetition interval is set to 24, which correspond to a seasonality of one day.
+# Time Series Analysis - with auto.arima
+Convert data into time series object. As the data has an hourly resolution, the time interval is set to 24, which correspond in this case to a seasonality of one day.
 ```{r}
 library(forecast)
 
@@ -73,13 +73,21 @@ fit <- auto.arima(train)
 ```
 
 Plot the time series with the prediction.
+```{r, echo=FALSE}
+fc <- predict(fit, n.ahead = 115*24)
+plot(ts_1, lty=3, cex = 0.1)
+lines(train, lwd=1)
+lines(fc$pred, lwd=2, col="red", cex = 0.1)
+```
+
+Plot the time series again, but with a focus on the prediction area. As it is to see, the model prediction has some noticable, small variation in the first five days. Then, it converge to value which is a bit 
 ```{r}
 fc <- predict(fit, n.ahead = 115*24)
-plot(ts_1, lty=3, size = 0.1)
+plot(ts_1, lty=3, cex = 0.1, xlim=c(240, 270), ylim=c(25, 125))
 lines(train, lwd=1)
-lines(fc$pred, lwd=2, col="red", size = 0.01)
-#lines(fc$pred+fc$se*1.96, col="red")
-#lines(fc$pred-fc$se*1.96, col="red")
+lines(fc$pred, lwd=2, col="red", cex = 0.1)
+
+mean(df_plantA_resample$Generation_kW[df_plantA_resample$Generation_kW > 0])
 ```
 
 Plot the decomposition of the time series with the function stl().
@@ -90,7 +98,7 @@ plot(decomp)
 
 
 # Second Time Series Analysis - Manipulated Data
-Some artificial years are added to the time series, to be able to capture the seasonal effects of the year.
+Some artificial years are added to the time series, to be able to capture the seasonal effect over the entire year.
 
 ## Data preparation
 ```{r}
@@ -110,7 +118,7 @@ ggplot(data = df_plantA_resample_2,
   geom_smooth(method = "gam", color = "cornflowerblue")
 ```
 
-Add random noise to first time series, in order togenerate new artificial years.
+Add random noise to first time series, in order to generate new artificial years.
 ```{r}
 ts_artif_1 <- {jitter(ts_2, factor=500, amount = NULL)}
 ts_artif_2 <- {jitter(ts_2, factor=500, amount = NULL)}
@@ -125,26 +133,37 @@ ts_artif_1[][ts_artif_1[] < 0] <- 0
 ts_artif_2[][ts_artif_2[] < 0] <- 0
 ```
 
-Create time series of several years, starting with real data year and two artificial years.
+Create time series of several years, starting with real data year and followed by two artificial years. A TS decomposition is then plotted via the function stl().
 ```{r}
 ts_artificial <- ts(c(ts_2, ts_artif_1, ts_artif_2), start = c(2019), deltat = 1/365)
-str(ts_artificial)
-```
-
-Plot decomposition of the time series with the function stl().
-```{r}
 decomp<-stl(ts_artificial, s.window = 365)
+str(ts_artificial)
 plot(decomp)
 ```
 
 Train model with the first two years of the time series. To train the model, the auto.arima function is made use of.
 ```{r}
-train_2 <- window(ts_artificial, start = 2019, end = 2020)
+ts_artificial_a <- ts(c(ts_2, ts_artif_1, ts_artif_2), start = c(2019), frequency = 365)
+
+train_2 <- window(ts_artificial_a, start = c(2019,1), end = c(2020,365))
 fit_2 <- auto.arima(train_2)
+arima_prediciton <- predict(fit_2, n.ahead = 100)
+
+plot(ts_artificial_a, cex = 0.1)
+lines(train_2)
+lines(arima_prediciton$pred, col = "red")
+```
+
+```{r, echo=FALSE, eval=FALSE}
+#arima_model <- arima(train_2, order = c(), seasonal = c())
+xx <- plot(diff(log(ts_artificial_a)))
+ts_artificial_a <- ts(c(ts_2, ts_artif_1, ts_artif_2))
+acf(ts_artificial_a, lag.max = 365)
+pacf(ts_artificial_a, lag.max = 365)
 ```
 
 
-# Artificial time series - new attemp: use of gam smoother as base and add normally distributed noise.
+# Artificial time series - new attemp: use of gam smoother as base for an artificial year and add normally distributed noise.
 
 Create new data frame with indexed data. This is done to avoid date handling
 ```{r}
@@ -168,27 +187,33 @@ Add noise to smoothed base year
 ```{r}
 library(BBmisc)
 library(fGarch)
-set.seed(1)
+set.seed(4)
 random_coef <- rsnorm(365, mean = 1, sd = 1, xi = 0.1)
 ran_coef_norm <- normalize(random_coef, method = "range", range = c(0, 1))
 #ran_coef_norm <- ran_coef_norm * 1.3
 ran_coef_norm_2 <- ran_coef_norm * runif(ran_coef_norm, min = 0.3, max = 1.6)
-base_y_with_noise <- gam_prediciton * ran_coef_norm_2
+gam_yr_with_noise <- gam_prediciton * ran_coef_norm_2
 
+par(mfrow=c(2,2))
+
+print("df_plantA_resample_2$Generation_kW")
 mean(df_plantA_resample_2$Generation_kW)
 median(df_plantA_resample_2$Generation_kW)
 hist(df_plantA_resample_2$Generation_kW, breaks = 11)
 
+print("")
+print("gam_prediciton")
 mean(gam_prediciton)
 median(gam_prediciton)
 hist(gam_prediciton, breaks = 11)
 
-hist(ran_coef_norm)
-
-mean(base_y_with_noise)
-median(base_y_with_noise)
-plot(base_y_with_noise, cex = 0.2)
-hist(base_y_with_noise, breaks = 11)
+print("")
+print("gam_yr_with_noise")
+hist(ran_coef_norm_2)
+mean(gam_yr_with_noise)
+median(gam_yr_with_noise)
+plot(gam_yr_with_noise, cex = 0.2)
+hist(gam_yr_with_noise, breaks = 11)
 ```
 
 While the artificial year visually looks satisfying, the mean generally is too low. It is not easy to change the noise parameters in such a way, that the variance and the mean of the artificial year gets near a similar value of the real data. Therefore, a function is create which aims to find the best parameter setting:
@@ -199,7 +224,7 @@ First, a list of parameter sets is created. This list is then used in a function
 library(BBmisc)
 xi <- c(25:1)/30
 min <- c(1:50)/100
-max <- c(50:80)/40
+max <- c(60:90)/40
 u <- list()
   for (i in xi) {
     for (n in min) {
@@ -234,7 +259,7 @@ get_artificial_years <- function(mean_real_yr, variance_real_yr, gam_prediciton)
     div_mean <- (mean_real_yr / mean(yr_with_noise))
     div_var <- (variance_real_yr / var(yr_with_noise))
        
-    treshold_1 <- (div_mean < 1.00 && div_mean > 0.95)
+    treshold_1 <- (div_mean < 1.025  && div_mean > 0.95)
     treshold_2 <- (div_var < 1.05 && div_var > 0.95)
     
     if (treshold_1 && treshold_2) {
@@ -243,7 +268,7 @@ get_artificial_years <- function(mean_real_yr, variance_real_yr, gam_prediciton)
       print(div_mean)
       print(div_var)
     }
-    if (i %in% (c(1:1000)*100)){
+    if (i %in% (c(1:1000)*500)){
       print(i)
     }
     
@@ -254,15 +279,16 @@ get_artificial_years <- function(mean_real_yr, variance_real_yr, gam_prediciton)
 ```
 
 Call the function to compute about 40'000 simulated years and and save all one that meet the threshold requirements.
-```{r}
+```{r, echo=FALSE}
 mean_real <- mean(df_plantA_resample_2$Generation_kW)
 var_real <- var(df_plantA_resample_2$Generation_kW)
 
+set.seed(41)
 noised_year <- get_artificial_years(mean_real, var_real, gam_prediciton)
 ```
 
 ```{r}
-df_artif <- t(noised_year[1,])
+df_artif <- t(noised_year[2,])
 arr <- array(as.numeric(unlist(df_artif)))
 print("Real")
 mean(df_plantA_resample_2$Generation_kW)
@@ -275,9 +301,28 @@ hist(df_plantA_resample_2$Generation_kW)
 hist(arr)
 ```
 
+```{r}
+ts_artificial_2 <- ts(c(noised_year[1,], noised_year[2,], noised_year[3,], noised_year[4,]), start = c(2019), deltat = 1/365)
+decomp_2 <- stl(ts_artificial_2, s.window = 1/24, t.window = 365)
+plot(decomp_2)
+```
 
 
+#```{r}
+ts_artificial_3 <- ts(c(noised_year[1,], noised_year[2,], noised_year[3,], noised_year[4,], noised_year[5,]), start = c(2019), deltat = 1/365)
+train_2 <- window(ts_artificial_3, start = 2019, end = 2024)
+fit <- auto.arima(train_2)
+```
 
+Plot the time series with the prediction.
+#```{r}
+fc <- predict(fit, n.ahead = 115*24)
+plot(ts_1, lty=3, size = 0.1)
+lines(train, lwd=1)
+lines(fc$pred, lwd=2, col="red", size = 0.01)
+#lines(fc$pred+fc$se*1.96, col="red")
+#lines(fc$pred-fc$se*1.96, col="red")
+```
 
 
 
