@@ -309,8 +309,18 @@ decomp_2 <- stl(ts_artificial_2, s.window = 1/24, t.window = 365)
 plot(decomp_2)
 ```
 
+```{r}
+gam_model_2 <- gam(generation_kw ~ s(time) + s(cloud_cover), data = df_weather)
+```
 
 
+```{r}
+df_weather
+d1 <- df_plantA %>%
+  mutate(datetime = floor_date(Timestamp, "24 hour")) %>%
+  group_by(datetime) %>%
+  summarise(across(Generation_kW:Overall_Consumption_Calc_kW, sum))
+```
 
 
 
