@@ -14,7 +14,7 @@ output:
     number_sections: yes
 ---
 
-```{r, echo= FALSE,message=FALSE}
+```{r, echo= FALSE,message=FALSE,warning=FALSE}
 # load library
 library(rstudioapi)
 library(ggplot2)
@@ -115,7 +115,7 @@ df_A_joined <-df_A_joined %>%
  )
 ```
 
-# Graphical Observations of Datasets
+# Graphical Exploration of Datasets
 
 In this chapter we would like to explore the dataset graphically. First we are going create a correlation matrix in order to see which variables correlate with the PV plant production rate. Then we explore the continuous as well as the categorical variables graphically.
 
