@@ -23,41 +23,63 @@ library(caret)
 library(GGally)
 library(mgcv)
 library(lubridate)
+library(ggcorrplot)
+library(mice)
 ```
 
-# Load Data
+# Data Preperation
+
+## Load Data
+
 ````{r, echo=FALSE}
 # set directory read data
 setwd(dirname(getActiveDocumentContext()$path))
 df_weather <- read.csv("./data/weather.csv",header=TRUE,sep =",",comment.char ="#")
-df_plantA <- read.csv("./data/A.csv",header=TRUE,sep =",",comment.char ="#")
-df_plantB <- read.csv("./data/B.csv",header=TRUE,sep =",",comment.char ="#")
-df_plantC <- read.csv("./data/C.csv",header=TRUE,sep =",",comment.char ="#")
+df_plantA <- read.csv("./data/A.csv",header=TRUE,sep =",")
+df_plantB <- read.csv("./data/B.csv",header=TRUE,sep =",")
+df_plantC <- read.csv("./data/C.csv",header=TRUE,sep =",")
 `````
+
+## Inspect Data Structure
 
 ````{r, echo=FALSE}
 # set directory read data
-head(df_weather)
+str(df_weather)
+str(df_plantA)
+str(df_plantB)
+str(df_plantC)
 `````
-```{r}
-df_weather$local_time <- as.POSIXct(df_weather$local_time,tz="GMT",format="%Y-%m-%d %H:%M")
-head(df_weather)
-```
 
-
-
+We got 8760 observations for the weather dataset and 35040 observations for each PV plant Dataset. Which makes sense since we got weather data for every hour for the year 2019 and on the other hand operational data of the PV plants for every 15 min in kW.
+The values are all of the type num except the datetime entries. These are of type char. In a next step we convert the datetime entries to a datetime object to have the possibility to work with the datetime entries. 
 
 ````{r, echo=FALSE}
 # set directory read data
 head(df_plantA)
+head(df_plantB)
+head(df_plantC)
+head(df_weather)
 `````
 
+## Convert datetime entries from char to datetime object
+
+Since all datetime are from the type char we convert the local time to a datetime object.
 ```{r}
+df_weather$local_time <- as.POSIXct(df_weather$local_time,tz="GMT",format="%Y-%m-%d %H:%M")
 df_plantA$Timestamp <- as.POSIXct(df_plantA$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
 df_plantB$Timestamp <- as.POSIXct(df_plantB$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
 df_plantC$Timestamp <- as.POSIXct(df_plantC$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
 head(df_plantA)
 ```
+
+## Checking Dataframes on Missing Values
+```{r}
+# Missing pattern
+options(max.print=10000)
+md.pattern(df_weather)
+```
+
+## Resample PV plant Timeseries from 15min to Hourly Intervalls
 
 ```{r}
 df_plantA_resample <- df_plantA %>%
@@ -71,9 +93,63 @@ df_plantA_resample <- df_plantA %>%
 head(df_plantA_resample)
 ```
 ```{r}
-df_weather %>% 
+df_weather <- df_weather %>% 
   rename(
     datetime = local_time,
     )
 ```
 
+
+
+```{r}
+df_A_joined <- inner_join(df_plantA_resample, df_weather, by = "datetime")
+```
+
+```{r}
+head(df_A_joined)
+```
+## Create Categorical Variable
+
+
+## Merge Datasets
+
+```{r}
+test <- select(df_A_joined,-c(datetime,time))
+```
+
+
+
+# Graphical Observations of Datasets
+```{r}
+corr <- round(cor(test), 1)
+head(corr[, 1:6])
+```
+
+```{r}
+ggcorrplot(corr, hc.order = TRUE, type = "lower",
+   outline.col = "white",
+   ggtheme = ggplot2::theme_gray,
+   colors = c("#6D9EC1", "white", "#E46726"))
+```
+
+# Battery Loading Algorithm
+
+
+```{r}
+battery_capacity <- 10 # Value in kWh
+max_battery_load <- 95 # in %
+min_battery_load <- 15 # in %
+
+battery_state <- function(battery_capacity,max_battery_load,min_battery_load,pv_generation, consumption){
+  if ((pv_generation-consumption) > 0 & battery_state < max_battery_load) {
+    if (battery_state + (pv_generation-consumption) < max_battery_load) {
+      battery_state = battery_state + (pv_generation-consumption)
+    } else if (battery_state + (pv_generation-consumption) >= max_battery_load) {
+      battery_state = battery_state
+    }
+  }
+}
+```
+
+
+battery_capacity <- 10 # Value in 
