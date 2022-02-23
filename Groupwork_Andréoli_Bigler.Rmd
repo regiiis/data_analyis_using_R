@@ -1,0 +1,629 @@
+---
+title: "Groupwork R Bootcamp"
+author: "Felix Bigler, Régis Andréoli"
+date: "2/23/2022"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+    number_sections: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+    toc_depth: 4
+    number_sections: yes
+---
+
+```{r, echo= FALSE,message=FALSE}
+# load library
+library(rstudioapi)
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(caret)
+library(GGally)
+library(mgcv)
+library(lubridate)
+library(ggcorrplot)
+library(BBmisc)
+library(fGarch)
+```
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+\newpage
+
+# Intrudction
+
+In this group work for the R bootcamp module, we would like to analyze a photovoltaic system dataset. The dataset was created during the operation of AEW-owned PV plants in 2019. In total there are 3 different plants but we will only concentrate on one (Plant A). The plants are all located in Aargau, Switzerland. The power values in kW refer to the average over the 15min period. The data was published for the Energy Data Hackdays 2020 in Brugg.
+
+We then merge this dataset with weather data from 2019 in order to evaluate the influence of the weather as well as be able to build a simple prediction model. Moreover we would like to create a simple battery charging algorithm in order to store surplus energy.
+
+# Data Preperation
+
+## Load Data
+
+````{r}
+# set directory read data
+setwd(dirname(getActiveDocumentContext()$path))
+df_weather <- read.csv("./data/weather.csv",header=TRUE,sep =",",comment.char ="#")
+df_plantA <- read.csv("./data/A.csv",header=TRUE,sep =",")
+````
+
+## Inspect Data Structure
+
+
+````{r, echo=TRUE,results="hide"}
+str(df_weather)
+str(df_plantA)
+````
+
+We got 8760 observations for the weather dataset and 35040 observations for each PV plant Dataset. Which makes sense since we got weather data for every hour for the year 2019 and on the other hand, operational data of the PV plants for every 15 min in kW.
+The values are all of the type num except the datetime entries. These are of type char. In a next step we convert the datetime entries to a datetime object to have the possibility to work with the datetime entries. 
+There are no missing values so we don't have to
+
+````{r, echo=FALSE,results="hide"}
+# set directory read data
+head(df_plantA)
+head(df_weather)
+````
+
+## Convert datetime entries from char to datetime object
+
+Since all datetime are from the type char we convert the local time to a datetime object.
+
+```{r,echo=TRUE}
+df_weather$local_time <- as.POSIXct(df_weather$local_time,tz="GMT",format="%Y-%m-%d %H:%M")
+df_plantA$Timestamp <- as.POSIXct(df_plantA$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
+```
+## Resample PV plant Timeseries from 15min to Hourly Intervalls
+
+Since the PV plant entries are 15 minute observations and the weather data is hourly we resample the PV plant dataset by grouping every 15 min observation to its corresponding hour and take the sum of it. We got then directly the energy gained in kWh instead of the 15 min PV power in kW which is more convenient.
+
+```{r}
+df_plantA_resample <- df_plantA %>%
+  mutate(datetime = floor_date(Timestamp, "1 hour")) %>%
+  group_by(datetime) %>%
+  summarise(across(Generation_kW:Overall_Consumption_Calc_kW, sum)) 
+```
+
+## Merge Datasets
+
+In this step we merge both datasets with an inner_join by the entry datetime. For that we have to rename the column local_time to datetime in the weather dataset.
+
+```{r}
+df_weather <- df_weather %>% 
+  rename(
+    datetime = local_time,
+    )
+```
+
+```{r}
+df_A_joined <- inner_join(df_plantA_resample, df_weather, by = "datetime")
+```
+
+## Create Categorical Variable
+
+A prerequisite of the course assignment is that the data set contains at least one categorical variable. Since our data set does not have any categorical variable we create two of them by extracting the month as well as the day out of the date time entries with the package lubridate as follows.
+
+```{r}
+df_A_joined <-df_A_joined %>%
+ mutate(
+  month = month(datetime),
+  month_label = month(datetime, label=TRUE),
+  hour = hour(datetime),
+  day = day(datetime),
+  year = year(datetime)
+ )
+```
+
+# Graphical Observations of Datasets
+
+In this chapter we would like to explore the dataset graphically. First we are going create a correlation matrix in order to see which variables correlate with the PV plant production rate. Then we explore the continuous as well as the categorical variables graphically.
+
+## Create Correlation Matrix
+
+```{r}
+knitr::opts_chunk$set(fig.width=12, fig.height=8)
+df_corr <- select(df_A_joined,-c(datetime,time,month_label,year,day,month)) 
+# Exclude datetime entries in order to create correlation matrix
+corr <- round(cor(df_corr), 1)
+#head(corr[, 1:6])
+```
+
+
+```{r,echo="False",results="hide"}
+head(df_corr)
+```
+
+
+```{r}
+p1 <- ggcorrplot(corr, hc.order = TRUE, type = "lower",
+   outline.col = "white",
+   ggtheme = ggplot2::theme_gray,
+   lab = TRUE,
+   colors = c("#6D9EC1", "white", "#E46726")) + 
+   labs(title = "Correlation Matrix",
+       subtitle = "PV Plant Production vs. Weather Conditions")
+p1
+```
+
+We can conclude from the correlation matrix, that the variables radiation_surface (Ground-level solar irradiance (W / m²)) and radiation_toa (Top of atmosphere solar irradiance (W / m²)) have a strong positive correlation with the PV production rate (variable Generation_kW). The coefficients are very high with a value of 0.9 which seems obvious, since a solar cell converts solar radiation into electrical energy when sunlight is present on the surface of the cell.
+The two variables certainly have a strong colinearity since the values differ only in respect to the fact that one value was measured at the ground and the other value above the atmosphere. For the actual solar production, however, only the value at the ground is relevant.
+
+The variable temperature has also a rather high correlation with a value of 0.6. However, this correlation may have more in common with the fact that the temperatures are also higher in the case of strong solar irradiation.
+In fact, solar modules have a negative temperature coefficient in relation to the efficiency rating (https://www.pveurope.eu/solar-modules/global-warming-growing-importance-temperature-coefficient-solar-modules).
+
+The other weather variables don't have a significant influence, therefore we concentrate on the variable irradiance in the further analysis of the data set.
+
+\newpage
+
+## Exploration of Contineous Variables
+
+### Yearly Ground-Level Irradiance
+
+```{r}
+p2 <-  ggplot(data = df_A_joined,
+         mapping = aes(y = Generation_kW ,
+                     x = radiation_surface)) + 
+  xlab("Ground-level solar irradiance [W / m²]") + 
+  ylab("PV generation [kWh]") + 
+     geom_point(alpha = 0.5,shape = 1) +
+     geom_smooth(method = "lm") 
+
+p3 <-  ggplot(data = df_A_joined,
+         mapping = aes(y = Generation_kW ,
+                     x = datetime)) + xlab("Date") + ylab("PV generation [kWh]") + 
+     geom_point(alpha = 0.2,shape = 1) +
+     labs(colour = "Method")
+
+grid.arrange(p2,p3, nrow=2,top = "Yearly Ground-Level Irradiance")
+```
+* we can conclude from the plot above, that the PV production highly correlates with the gorund level solar irradiance as the correlation plot already explained.The blue line indicates a linear regression line.
+
+## Exploration of Categorical Variables
+
+### Seasonal and Timely Ground-Level Irradiance
+
+```{r,echo=FALSE}
+p4 <- ggplot(data = df_A_joined,
+       mapping = aes(y = radiation_surface,
+                     x = factor(hour),fill= hour)) + ylab("Ground-Level Irradiance") + xlab("Hour") +  labs(fill="Month") +
+geom_boxplot() 
+
+p5 <- ggplot(data = df_A_joined,
+       mapping = aes(y = radiation_surface,
+                     x = factor(month),fill= month)) + ylab("Ground-Level Irradiance") + xlab("Month") +  labs(fill="Month") +
+geom_boxplot()
+
+grid.arrange(p4,p5, nrow=2,top = "Seasonal and Timely Influnece upon Ground-Level Irradiance")
+```
+
+* as we have expected, the most solar irradiance occurs between April and September and during the hours from 10am to 3pm as the boxplots above indicates.
+
+\newpage
+
+## PV Plant Production
+
+```{r}
+library(viridis)
+library(ggExtra)
+p6 <- ggplot(data = df_A_joined, aes(x = day,y = hour,fill=Generation_kW))+
+  geom_tile(color= "white",size=0.1) + 
+  scale_fill_viridis(name="Houerly PV Generation [kWh]",option ="C") + 
+  facet_grid(year ~ month_label) +
+  scale_y_continuous(trans = "reverse", breaks = unique(df_A_joined$hour)) +
+  scale_x_continuous(breaks =c(1,10,20,31)) +
+  theme_minimal(base_size = 10)+
+  labs(title= "Seasonal and Timely Distribution of PV-Plant Production")+ 
+  theme(legend.position = "bottom") +
+  theme(plot.title=element_text(size = 14)) + theme(axis.text.y=element_text(size=6)) +
+  theme(strip.background = element_rect(colour="white")) +
+  theme(plot.title=element_text(hjust=0)) + theme(axis.ticks=element_blank()) +
+  theme(axis.text=element_text(size=7)) + theme(legend.title=element_text(size=8)) +
+  theme(legend.text=element_text(size=6)) +theme(plot.title = element_text(hjust = 0.5)) +
+  removeGrid()
+p6
+```
+
+* the plot above shows the seasonal and timely distribution of the PV production of the plant A. 
+
+\newpage
+
+# Battery Loading Algorithm
+
+The main drawback of photovoltaics is that most of the energy production falls into the summer months, which leads to a surplus of energy during this period. This surplus can be stored with a battery, for example. We would like to create a simple battery charging algorithm to simulate a battery in the solar system and evaluate how the self-consumption-rate can be increased by adding a storage.
+
+## Self-Consumption-Rate Without Storage System
+
+Lets first calculate the self-consumption-rate of the system without a battery. We define a function as follows to determine when the produced energy is directly consumed and not feed into the grid:
+
+```{r}
+
+self_consumption_rate <- function(generation,consumption,i){
+  self_con <- as.data.frame(matrix(1:8759,ncol=1))
+    if ((generation - consumption) >= 0) {
+      self_con$V1[i] = consumption
+    }else {
+      self_con$V1[i] = 0
+    }
+}  
+```
+
+We create then a new data frame self_consumption and apply the function with a for loop over the original data frame df_A_joined as follows:
+
+```{r}
+self_consumption <- as.data.frame(matrix(1:8759,ncol=1))
+for(i in 1:nrow(df_A_joined)){
+    self_consumption$V1[i] <- self_consumption_rate(df_A_joined$Generation_kW[i],
+                                                df_A_joined$Overall_Consumption_Calc_kW[i],
+                                                i)
+}
+```
+
+Now we can calculate the self-consumption-rate as follows:
+
+```{r}
+sum(self_consumption$V1)/sum(df_A_joined$Generation_kW)
+```
+* we can see that only 20 % of the produced energy is used directly, the other part is feed into the grid.
+
+### Create Simple Battery Loading Algorithm
+
+The next step is to create a simple battery loading function. The input variables for the function are battery capacity, max. battery capacity, min. battery capacity, the PV generation as well as the consumption and the initial battery charging state.
+
+```{r}
+battery_state <- function(battery_capacity,max_battery_capacity,min_battery_capacity,pv_generation, consumption,battery_state) {
+  
+  min_battery_load = battery_capacity * (min_battery_capacity)/100
+  max_battery_load = battery_capacity * (max_battery_capacity)/100
+  battery_load = battery_state
+  
+  if ((pv_generation - consumption) > 0 & battery_load < max_battery_load) {
+    if (battery_load + (pv_generation - consumption) > max_battery_load) {
+      battery_load = max_battery_load  
+    } else 
+    {battery_load = battery_load + (pv_generation - consumption)} 
+  }
+  else if ((pv_generation-consumption) < 0 & (battery_load > min_battery_load)) {
+    if (battery_load + (pv_generation - consumption) < min_battery_load) {
+      battery_load = min_battery_load 
+    } else {
+      battery_load = battery_load + (pv_generation - consumption) }
+  }
+   return(battery_load) 
+}  
+
+```
+
+We apply now the battery loading algorithm. We us different battery sizes from 45 kWH up to 450 kWh in 45 kWh steps.
+
+```{r}
+max_battery_capacity <- 95 # in %
+min_battery_capacity <- 15 # in %
+
+battery_states <- as.data.frame(matrix(0,nrow=8759,ncol=10))
+x <- 1
+
+for (j in seq(45, 450, length.out=10)) {
+    for(i in 2:nrow(df_A_joined)) { 
+      battery_states[i,x] <- battery_state(j,max_battery_capacity,min_battery_capacity,
+                                                df_A_joined$Generation_kW[i],
+                                                df_A_joined$Overall_Consumption_Calc_kW[i],
+                                                battery_states[i-1,x])
+    }
+  x = x + 1
+}
+```
+
+### Calculate Self-Consumption-Rate for Differnt Battery Sizes
+
+
+```{r}
+self_consumption_battery <- as.data.frame(matrix(0,nrow=8759,ncol=10))
+for(j in seq(1,10,length.out = 10)){
+  for(i in 1:8758) {
+    if ((battery_states[i+1,j] - battery_states[i,j]) < 0) {
+      self_consumption_battery[i+1,j] <- self_consumption[i+1,1] + abs(battery_states[i+1,j] - battery_states[i,j])
+    } else{self_consumption_battery[i+1,j] <- self_consumption[i+1,1]}
+  }
+}
+```
+
+* The next step is to create a dataframe containing the different self-consumption-ratios and
+the corresponding battery capacity.
+
+\newpage
+
+```{r}
+df_self_con_ratio <- as.data.frame(colSums(self_consumption_battery)/sum(df_A_joined$Generation_kW))
+
+df_self_con_ratio$battery_capacity <- seq(45, 450, length.out=10)
+colnames(df_self_con_ratio) <- c("self_consumption_ratio_kWh","battery_capacity_kWh")
+
+new_row <- c(sum(self_consumption$V1)/sum(df_A_joined$Generation_kW),0)
+df_self_con_ratio  <- rbind(new_row,df_self_con_ratio)
+```
+
+
+```{r,echo=FALSE}
+p7 <-  ggplot(data = df_self_con_ratio,
+         mapping = aes(y = self_consumption_ratio_kWh,
+                     x = battery_capacity_kWh)) + xlab("Nominal Battery Capacity [kWh]") + ylab("Yearly Self-Consumption-Rate [%]") + 
+     geom_smooth() +
+     geom_point(shape = 3,size=5)
+     xlim(0,500)
+p7
+```
+
+* as we can see from the plot above, the self-consumption-rate starts to flatten out at around a capacity of 220 kWh. This can be explained by the fact, that after a certain point, an increase in battery capacity no longer causes a noticeable increase in the self-consumption rate, since only individual peaks of the PV production are additionally stored.
+
+In the next chapters we try to fit a timeseries model and a GAM model to predict the PV production.
+
+\newpage
+
+## Time Series Analysis - With auto.arima
+
+The explored model for prediction is a time series model, called SARIMA. To be able to compute those types of models, the data set has first to be converted into a time series object. As the data has an hourly resolution, the time interval of the TS object is set to 24, which correspond, in this case, to the seasonality of one day. The model is then trained with the first 250 days of the year.
+
+```{r}
+library(forecast)
+
+ts_1 <- ts((df_plantA_resample$Generation_kW), deltat = 1/24)
+train <- window(ts_1, start = 1, end = 250)
+fit <- auto.arima(train)
+```
+
+### Model Prediction
+The trained model is then used for a prediction. The predicted days are from day 250 to 365. The result can be seen in the following plot. Red are the predicted data, black are the real data.
+
+```{r, echo=FALSE}
+fc <- predict(fit, n.ahead = 115*24)
+plot(ts_1, lty=3, cex = 0.1)
+lines(train, lwd=1)
+lines(fc$pred, lwd=2, col="red", cex = 0.1)
+```
+
+As one can see above, prediction range of the plot is not very helpful. So, another plot is computed, but this time with a zoom set on the prediction area. As it is to see, the prediction has some variation for the first few days. Then, it converges to value which is a little bit higher than the mean of the data.
+
+```{r}
+fc <- predict(fit, n.ahead = 115*24)
+plot(ts_1, lty=3, cex = 0.1, xlim=c(240, 270), ylim=c(25, 125))
+lines(train, lwd=1)
+lines(fc$pred, lwd=2, col="red", cex = 0.1)
+```
+
+## Time Series Analysis - with Manipulated Data
+
+Because the previous results were not satisfying at all, a few changes to the data set are undertaken. First, the resolution is set to daily. Secondly, some artificial years are generated and added to the time series. This, in order to be able to capture the seasonal effect over the entire year. This entire part is done with an experimental intention and from curiosity.
+With the resolution set to daily, the data set shrink to 365 entries.
+
+```{r, echo=FALSE}
+df_plantA_resample_2 <- df_plantA %>%
+  mutate(datetime = floor_date(Timestamp, "24 hour")) %>%
+  group_by(datetime) %>%
+  summarise(across(Generation_kW:Overall_Consumption_Calc_kW, sum))
+
+ts_2 <- ts((df_plantA_resample_2$Generation_kW), start = c(2019), deltat = 1/365)
+```
+
+Plot of new time series with a resolution of one day and a GAM smoother.
+
+```{r}
+ggplot(data = df_plantA_resample_2,
+  mapping = aes(y = Generation_kW, x = datetime)) +
+  geom_point(size = 1, color = "grey69") +
+  geom_smooth(method = "gam", color = "cornflowerblue")
+```
+
+First, some artificial years were created by simply adding noise with the jitter() function. Because of the occurrence of minus values in this procedure, minus values have to be corrected to zero in a second process. With the new data set, a TS decomposition is plotted via the function stl(). Then, a new model is trained and a forecast is predicted. Again, the prediction performance is rather poor.
+
+```{r, echo=FALSE}
+ts_artif_1 <- {jitter(ts_2, factor=500, amount = NULL)}
+ts_artif_2 <- {jitter(ts_2, factor=500, amount = NULL)}
+ts_artif_1[][ts_artif_1[] < 0] <- 0
+ts_artif_2[][ts_artif_2[] < 0] <- 0
+```
+
+
+```{r}
+ts_artificial <- ts(c(ts_2, ts_artif_1, ts_artif_2), start = c(2019), deltat = 1/365)
+decomp<-stl(ts_artificial, s.window = 365)
+str(ts_artificial)
+plot(decomp)
+```
+
+Train model with the first two years of the time series. To train the model, the auto.arima function is made use of.
+
+```{r, echo=FALSE}
+ts_artificial_a <- ts(c(ts_2, ts_artif_1, ts_artif_2), start = c(2019), frequency = 365)
+
+train_2 <- window(ts_artificial_a, start = c(2019,1), end = c(2020,365))
+fit_2 <- auto.arima(train_2)
+arima_prediciton <- predict(fit_2, n.ahead = 100)
+
+plot(ts_artificial_a, cex = 0.1)
+lines(train_2)
+lines(arima_prediciton$pred, col = "red")
+```
+
+## Time Series Analysis - with Manipulated Data - new approach
+
+In the previous part, the creation of the artificial years brought up some concerns regarding the quality of those artificial data. In this part, the focus is set to discover a method to generate artificial data similar to the real data in terms of variance, mean and distribution of the data. The method is as follow: :
+1. Use of GAM smoother as base for an artificial year
+2. Add normally distributed, left screwed noise.
+
+For that, a new data frame with indexed data is created. This is done to avoid the handling of date type.
+
+```{r}
+df_artif <- data.frame(time = (1:365), generation_kw = df_plantA_resample_2$Generation_kW)
+```
+
+Now, a GAM is computed from the new data frame.
+
+```{r}
+gam_model <- gam(generation_kw ~ s(time), data = df_artif)
+```
+
+In order to generate a data set out of the GAM, 365 prediction are computed within the entire year. The result is plotted to visually check the result. As shown below, the data frame plot is, at least qualitatively, very similar to the ggplot GAM smoother line. This result is taken as a base for the artificial years. 
+
+```{r}
+df_time <- data.frame(time = c(1:365))
+gam_prediction <- predict(gam_model, newdata = df_time)
+plot(gam_prediction, cex = 0.1, )
+```
+
+After the creation of a "base year", noise is added. In order to keep the heteroskedastic behavior of the real data, the noise is added as a multiplication by a random coefficient. This coefficient is first created as a left screwed, normally distributed random number. Then, it is normalized from 0 to 1. Last, those noise coefficient between 0 and 1 are again multiplied with an random coefficient in a predefined range (0.3 to 1.6), in order to level the mean of the data set. A quick look at the plot show a satisfying result.
+
+Add noise to smoothed base year:
+
+```{r}
+set.seed(4)
+random_coef <- rsnorm(365, mean = 1, sd = 1, xi = 0.1)
+ran_coef_norm <- normalize(random_coef, method = "range", range = c(0, 1))
+ran_coef_norm_2 <- ran_coef_norm * runif(ran_coef_norm, min = 0.3, max = 1.6)
+gam_yr_with_noise <- gam_prediction * ran_coef_norm_2
+```
+
+```{r, echo=FALSE}
+par(mfrow=c(2,2))
+
+print("Real Data")
+paste("Mean:     ", mean(df_plantA_resample_2$Generation_kW))
+paste("Variance: ", var(df_plantA_resample_2$Generation_kW))
+hist(df_plantA_resample_2$Generation_kW, breaks = 11, main="Real Data")
+
+print("GAM prediction")
+paste("Mean:     ", mean(gam_prediction))
+paste("Variance: ", var(gam_prediction))
+hist(gam_prediction, breaks = 11, main="GAM prediction")
+
+print("Artificial Data")
+paste("Mean:     ", mean(gam_yr_with_noise))
+paste("Variance: ", var(gam_yr_with_noise))
+plot(gam_yr_with_noise, cex = 0.2, main="Artificial Data")
+hist(gam_yr_with_noise, breaks = 11, main="Artificial Data")
+```
+
+While the artificial year visually looks satisfying, the mean generally is too low. It is not easy to change the "noise" parameters in such a way, that the variance and the mean of the artificial year gets near the similar value of the real data. Therefore, a function is create which aims to find the best parameter setting:
+
+First, a list of parameter sets is created. This list is then used in a function that loops through the list and creates, for each set, a noised year. The noised year is then compared with the real year by its mean and variance. A threshold for mean and variance is set and if they are cumulatively fulfilled, the function saves the year data in a list. At the end of the loop, the list of years is returned by the function.
+
+### Function To Get Artificial Year
+
+Create list of parameter sets:
+
+```{r}
+library(BBmisc)
+xi <- c(25:1)/30
+min <- c(1:50)/100
+max <- c(60:90)/40
+u <- list()
+  for (i in xi) {
+    for (n in min) {
+      for (q in max) {
+        o <- c(i, n, q)
+        u <- rbind(u,o)
+      }
+    }
+  }
+```
+
+
+Following is the function that loops through parameter list:
+
+
+```{r}
+get_artificial_years <- function(mean_real_yr, variance_real_yr, gam_prediction) {
+  
+  div_mean <- 0
+  div_var <- 0
+  i = 1
+  treshold_1 <- TRUE
+  treshold_2 <- TRUE
+  df_sets <- list()
+  m <- (length(u)/3 - 1)
+  
+  for (n in u) {
+    if (i == m) {
+      break
+    }
+    ran_coef <- rsnorm(365, mean = 1, sd = 1, xi = as.numeric(u[i,][1]))
+    ran_coef_norm <- normalize(ran_coef, method = "range", range = c(0, 1))
+    ran_coef_norm_2 <- ran_coef_norm * runif(ran_coef_norm, min = as.numeric(u[i,][2]), max = as.numeric(u[i,][3]))
+
+    yr_with_noise <- gam_prediction * ran_coef_norm_2
+    div_mean <- (mean_real_yr / mean(yr_with_noise))
+    div_var <- (variance_real_yr / var(yr_with_noise))
+       
+    treshold_1 <- (div_mean < 1.025  && div_mean > 0.95)
+    treshold_2 <- (div_var < 1.05 && div_var > 0.95)
+    
+    if (treshold_1 && treshold_2) {
+      df_sets <- rbind(df_sets, yr_with_noise)
+      print(i)
+      print(div_mean)
+      print(div_var)
+    }
+    if (i %in% (c(1:10000)*5000)){
+      paste("Year computed: ", i)
+    }
+    
+    i <- i + 1
+  }
+  df_sets
+}
+```
+
+
+Call the function to compute about 40'000 simulated years and and save all ones that meet the threshold requirements. With set.seed() to 41, four years fulfill the thresholds.
+
+
+```{r, echo=FALSE, message=FALSE}
+mean_real <- mean(df_plantA_resample_2$Generation_kW)
+var_real <- var(df_plantA_resample_2$Generation_kW)
+
+set.seed(41)
+noised_years <- get_artificial_years(mean_real, var_real, gam_prediction)
+```
+
+Plot and compare the results with the real data. As it is to see, the results appear to be satisfying, excepting the few outliers, which are values over ~1800.
+
+```{r, echo=FALSE}
+df_artif <- t(noised_years[2,])
+array_artif <- array(as.numeric(unlist(df_artif)))
+print("Real Data")
+paste("Mean:     ", mean(df_plantA_resample_2$Generation_kW))
+paste("Variance: ", var(df_plantA_resample_2$Generation_kW))
+print("Artificial Data")
+paste("Mean:     ", mean(array_artif))
+paste("Variance: ", var(array_artif))
+```
+
+As last manipulation, the few outliers over a value of 1800 are pulled down. This is done for all the returned artificial years.
+
+```{r}
+noised_years[1,][noised_years[1,] > 1800] <- (as.numeric(noised_years[1,]) * 0.75)
+df_artif_2 <- t(noised_years[1,])
+array_artif_2 <- array(as.numeric(unlist(df_artif_2)))
+par(mfrow=c(2,2))
+plot(array_artif_2, cex = .2, main="Plot Artificial Data")
+hist(array_artif_2, main = "Histogram Artificial Data")
+```
+```{r, echo=FALSE}
+noised_years[2,][noised_years[2,] > 1800] <- (as.numeric(noised_years[2,]) * 0.75)
+noised_years[3,][noised_years[3,] > 1800] <- (as.numeric(noised_years[3,]) * 0.75)
+noised_years[4,][noised_years[1,] > 1800] <- (as.numeric(noised_years[4,]) * 0.75)
+```
+
+### Plot final Results Of Artificial Data
+
+Create TS with artificial years. Then investigate with the stl() function. Each year differs now much more than the others. This result is considered as successful. This experimental excursion delivers an interesting result which could be now further used to explore predictive modelling. As for now, this will be the end of this part.
+
+```{r}
+ts_artificial_2 <- ts(c(noised_years[1,], noised_years[2,], noised_years[3,], noised_years[4,]), start = c(2019), deltat = 1/365)
+decomp_2 <- stl(ts_artificial_2, s.window = 1/24, t.window = 365)
+plot(decomp_2)
+```
