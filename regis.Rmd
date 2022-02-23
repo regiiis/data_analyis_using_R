@@ -40,16 +40,12 @@ library(fGarch)
 setwd(dirname(getActiveDocumentContext()$path))
 df_weather <- read.csv("./data/weather.csv",header=TRUE,sep =",",comment.char ="#")
 df_plantA <- read.csv("./data/A.csv",header=TRUE,sep =",",comment.char ="#")
-df_plantB <- read.csv("./data/B.csv",header=TRUE,sep =",",comment.char ="#")
-df_plantC <- read.csv("./data/C.csv",header=TRUE,sep =",",comment.char ="#")
 ```
 
 # Data preparation
 ```{r}
 df_weather$local_time <- as.POSIXct(df_weather$local_time,tz="GMT",format="%Y-%m-%d %H:%M")
 df_plantA$Timestamp <- as.POSIXct(df_plantA$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
-df_plantB$Timestamp <- as.POSIXct(df_plantB$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
-df_plantC$Timestamp <- as.POSIXct(df_plantC$Timestamp,tz="GMT",format="%Y-%m-%d %H:%M:%S")
 ```
 
 # Predictive Modeling
@@ -309,20 +305,20 @@ decomp_2 <- stl(ts_artificial_2, s.window = 1/24, t.window = 365)
 plot(decomp_2)
 ```
 
+
 ```{r}
-gam_model_2 <- gam(generation_kw ~ s(time) + s(cloud_cover), data = df_weather)
+df_for_gam <- df_plantA_resample
+df_for_gam$weather <- df_weather$radiation_toa
+#df_for_gam$Month <- as.POSIXct(df_plantA_resample$datetime,tz="GMT",format="%H")
+#df_for_gam$Hour <- as.POSIXct(df_plantA_resample$datetime,tz="GMT",format="%H")
+test <- as.POSIXct(df_plantA_resample$datetime, format = "%H")
+test
 ```
 
 
 ```{r}
-df_weather
-d1 <- df_plantA %>%
-  mutate(datetime = floor_date(Timestamp, "24 hour")) %>%
-  group_by(datetime) %>%
-  summarise(across(Generation_kW:Overall_Consumption_Calc_kW, sum))
+gam_model_2 <- gam(Generation_kW ~ s(time, k = 24) + s(weather), data = df_plantA_resample)
 ```
-
-
 
 
 
