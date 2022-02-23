@@ -3,14 +3,14 @@ title: "Groupwork R Bootcamp"
 author: "Felix Bigler, Régis Andréoli"
 date: "2/23/2022"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '4'
-    number_sections: yes
   html_document:
     toc: yes
     toc_float: yes
     toc_depth: 4
+    number_sections: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
     number_sections: yes
 ---
 
@@ -29,13 +29,9 @@ library(BBmisc)
 library(fGarch)
 ```
 
-```{r, include=FALSE}
-options(tinytex.verbose = TRUE)
-```
-
 \newpage
 
-# Intrudction
+# Introudction
 
 In this group work for the R bootcamp module, we would like to analyze a photovoltaic system dataset. The dataset was created during the operation of AEW-owned PV plants in 2019. In total there are 3 different plants but we will only concentrate on one (Plant A). The plants are all located in Aargau, Switzerland. The power values in kW refer to the average over the 15min period. The data was published for the Energy Data Hackdays 2020 in Brugg.
 
@@ -47,7 +43,7 @@ We then merge this dataset with weather data from 2019 in order to evaluate the 
 
 ````{r}
 # set directory read data
-setwd(dirname(getActiveDocumentContext()$path))
+#setwd(dirname(getActiveDocumentContext()$path))
 df_weather <- read.csv("./data/weather.csv",header=TRUE,sep =",",comment.char ="#")
 df_plantA <- read.csv("./data/A.csv",header=TRUE,sep =",")
 ````
@@ -62,7 +58,7 @@ str(df_plantA)
 
 We got 8760 observations for the weather dataset and 35040 observations for each PV plant Dataset. Which makes sense since we got weather data for every hour for the year 2019 and on the other hand, operational data of the PV plants for every 15 min in kW.
 The values are all of the type num except the datetime entries. These are of type char. In a next step we convert the datetime entries to a datetime object to have the possibility to work with the datetime entries. 
-There are no missing values so we don't have to
+There are no missing values in both datasets.
 
 ````{r, echo=FALSE,results="hide"}
 # set directory read data
@@ -232,7 +228,7 @@ p6
 
 \newpage
 
-# Battery Loading Algorithm
+# Battery Loading Algorithm  (Chapter of choice 1)
 
 The main drawback of photovoltaics is that most of the energy production falls into the summer months, which leads to a surplus of energy during this period. This surplus can be stored with a battery, for example. We would like to create a simple battery charging algorithm to simulate a battery in the solar system and evaluate how the self-consumption-rate can be increased by adding a storage.
 
@@ -298,7 +294,7 @@ battery_state <- function(battery_capacity,max_battery_capacity,min_battery_capa
 
 ```
 
-We apply now the battery loading algorithm. We us different battery sizes from 45 kWH up to 450 kWh in 45 kWh steps.
+We apply now the battery loading algorithm. We us different battery sizes from 45 kWh up to 450 kWh in 45 kWh steps.
 
 ```{r}
 max_battery_capacity <- 95 # in %
@@ -318,7 +314,7 @@ for (j in seq(45, 450, length.out=10)) {
 }
 ```
 
-### Calculate Self-Consumption-Rate for Differnt Battery Sizes
+### Calculate Self-Consumption-Rate for Different Battery Sizes
 
 
 ```{r}
@@ -364,6 +360,8 @@ In the next chapters we try to fit a timeseries model and a GAM model to predict
 
 \newpage
 
+# Predicting PV Prodcution (Chapter of choice 2)
+
 ## Time Series Analysis - With auto.arima
 
 The explored model for prediction is a time series model, called SARIMA. To be able to compute those types of models, the data set has first to be converted into a time series object. As the data has an hourly resolution, the time interval of the TS object is set to 24, which correspond, in this case, to the seasonality of one day. The model is then trained with the first 250 days of the year.
@@ -377,6 +375,7 @@ fit <- auto.arima(train)
 ```
 
 ### Model Prediction
+
 The trained model is then used for a prediction. The predicted days are from day 250 to 365. The result can be seen in the following plot. Red are the predicted data, black are the real data.
 
 ```{r, echo=FALSE}
@@ -511,7 +510,7 @@ While the artificial year visually looks satisfying, the mean generally is too l
 
 First, a list of parameter sets is created. This list is then used in a function that loops through the list and creates, for each set, a noised year. The noised year is then compared with the real year by its mean and variance. A threshold for mean and variance is set and if they are cumulatively fulfilled, the function saves the year data in a list. At the end of the loop, the list of years is returned by the function.
 
-### Function To Get Artificial Year
+## Function To Get Artificial Year
 
 Create list of parameter sets:
 
@@ -627,3 +626,15 @@ ts_artificial_2 <- ts(c(noised_years[1,], noised_years[2,], noised_years[3,], no
 decomp_2 <- stl(ts_artificial_2, s.window = 1/24, t.window = 365)
 plot(decomp_2)
 ```
+
+# Conclusion
+
+First of all, we would like to mention that by taking this module and working on the group project, the advantages of the software R became apparent to us, also compared to Python. Especially the packages ggplot, lubridate as well as dplyr are extremely useful and intuitive. We are convinced that we will use R for certain tasks in the future. R Markdown is also interesting. However, we had an error message at the end when creating the pdf, which we could not solve until now. One possibility we see is to switch to Jupyter Lab, which also supports R and the language markdown to create documents.
+
+Regarding a forecast model for photovoltaic production, it should be mentioned that a model is strongly dependent on the weather forecast. Especially to predict exact hourly values is sometimes difficult because a passage of a cloud can change the situation like a switch. Therefore, it might be difficult to predict exact hourly values or even 15min values in the future, depending on the weather situation.
+The inclusion of a physical model could further improve the prediction.
+
+Furthermore, we have found that a purely mathematical model like the ARIMA is clearly inferior to a GAM model with weather data as predictors. Since we considered both models in different modules it was very interesting for us to compare them.
+
+For further investigation of the ideal battery size, including the cost per battery size and electricity prices, would be an interesting addition to improve the overall system profitability.
+
