@@ -3,18 +3,18 @@ title: "Groupwork R Bootcamp"
 author: "Felix Bigler, Régis Andréoli"
 date: "2/23/2022"
 output:
-  word_document:
-    toc: yes
-    toc_depth: '4'
-  pdf_document:
-    toc: yes
-    toc_depth: '4'
-    number_sections: yes
   html_document:
     toc: yes
     toc_float: yes
     toc_depth: 4
     number_sections: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+    number_sections: yes
+  word_document:
+    toc: yes
+    toc_depth: '4'
 ---
 
 ```{r, echo= FALSE,message=FALSE,warning=FALSE}
@@ -431,7 +431,6 @@ ts_artif_1[][ts_artif_1[] < 0] <- 0
 ts_artif_2[][ts_artif_2[] < 0] <- 0
 ```
 
-
 ```{r}
 ts_artificial <- ts(c(ts_2, ts_artif_1, ts_artif_2), start = c(2019), deltat = 1/365)
 decomp<-stl(ts_artificial, s.window = 365)
@@ -535,9 +534,7 @@ u <- list()
   }
 ```
 
-
 Following is the function that loops through parameter list:
-
 
 ```{r}
 get_artificial_years <- function(mean_real_yr, variance_real_yr, gam_prediction) {
@@ -581,9 +578,7 @@ get_artificial_years <- function(mean_real_yr, variance_real_yr, gam_prediction)
 }
 ```
 
-
 Call the function to compute about 40'000 simulated years and and save all ones that meet the threshold requirements. With set.seed() to 41, four years fulfill the thresholds.
-
 
 ```{r, echo=FALSE, message=FALSE}
 mean_real <- mean(df_plantA_resample_2$Generation_kW)
@@ -632,6 +627,55 @@ decomp_2 <- stl(ts_artificial_2, s.window = 1/24, t.window = 365)
 plot(decomp_2)
 ```
 
+## GAM Model - With Meteo Data
+As previously seen, a pure mathematical model like ((S)ARIMA) is not suited for a predictive  modelling of the data. Also, the power generation data set is contains not enough information to explain the apparently random behavior of the energy production. Thus, in the following part, the energy production data set is complemented by its local meteo data.
+
+```{r}
+df_for_gam <- df_plantA_resample
+df_for_gam$irradiance <- df_weather$radiation_surface
+df_for_gam$temp <- df_weather$temperature
+df_for_gam <-df_for_gam %>%
+ mutate(
+  month = month(datetime),
+  month_label = month(datetime, label=TRUE),
+  hour = hour(datetime),
+  day = day(datetime),
+  year = year(datetime)
+ )
+```
+
+```{r}
+gam_model_2 <- gam(Generation_kW ~ s(hour) + s(month) + s(irradiance) + s(temp), data = df_for_gam)
+summary(gam_model_2)
+```
+
+Create train and test partition.
+```{r}
+set.seed(42)
+indices <- createDataPartition(df_for_gam$Generation_kW, p=.8, list = F)
+train <- df_for_gam %>% slice(indices)
+test <- df_for_gam %>% slice(-indices)
+```
+
+
+```{r}
+gam_model_2 <- gam(Generation_kW ~ s(hour) + s(month) + s(irradiance) + s(temp), data = train)
+summary(gam_model_2)
+```
+
+```{r}
+pred <- predict(gam_model_2, test %>% select(-Generation_kW))
+control <- test$Generation_kW
+```
+
+### GAM with Meteo Data - Result
+```{r}
+plot(control, pred, col='orange', cex = .45, pch=20, ylab = "Predicted Hourly Energy Production", xlab = "Real Energy Production")
+abline(0,1)
+sqrt(mean((control - pred)^2))
+```
+
+
 # Conclusion
 
 First of all, we would like to mention that by taking this module and working on the group project, the advantages of the software R became apparent to us, also compared to Python. Especially the packages ggplot, lubridate as well as dplyr are extremely useful and intuitive. We are convinced that we will use R for certain tasks in the future. R Markdown is also interesting. However, we had an error message at the end when creating the pdf, which we could not solve until now. One possibility we see is to switch to Jupyter Lab, which also supports R and the language markdown to create documents.
@@ -639,7 +683,7 @@ First of all, we would like to mention that by taking this module and working on
 Regarding a forecast model for photovoltaic production, it should be mentioned that a model is strongly dependent on the weather forecast. Especially to predict exact hourly values is sometimes difficult because a passage of a cloud can change the situation like a switch. Therefore, it might be difficult to predict exact hourly values or even 15min values in the future, depending on the weather situation.
 The inclusion of a physical model could further improve the prediction.
 
-Furthermore, we have found that a purely mathematical model like the ARIMA is clearly inferior to a GAM model with weather data as predictors. Since we considered both models in different modules it was very interesting for us to compare them.
+Furthermore, we have found that a purely mathematical model like the (S)ARIMA is clearly inferior to a GAM model with weather data as predictors. Since we covered both models in different modules it was very interesting for us to compare them.
 
 For further investigation of the ideal battery size, including the cost per battery size and electricity prices, would be an interesting addition to improve the overall system profitability.
 
