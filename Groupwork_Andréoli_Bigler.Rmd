@@ -352,8 +352,10 @@ p7 <-  ggplot(data = df_self_con_ratio,
          mapping = aes(y = self_consumption_ratio_kWh,
                      x = battery_capacity_kWh)) + xlab("Nominal Battery Capacity [kWh]") + ylab("Yearly Self-Consumption-Rate [%]") + 
      geom_smooth() +
-     geom_point(shape = 3,size=5)
-     xlim(0,500)
+     geom_point(shape = 3,size=5) +
+     labs(title = "Yearly Self-consumption-ratio vs.Different Battery Sizes")
+     xlim(0,500) 
+     
 p7
 ```
 
