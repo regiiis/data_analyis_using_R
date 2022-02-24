@@ -611,7 +611,7 @@ As last manipulation, the few outliers over a value of 1800 are pulled down. Thi
 noised_years[1,][noised_years[1,] > 1800] <- (as.numeric(noised_years[1,]) * 0.75)
 df_artif_2 <- t(noised_years[1,])
 array_artif_2 <- array(as.numeric(unlist(df_artif_2)))
-par(mfrow=c(2,1))
+par(mfrow=c(1,2))
 plot(array_artif_2, cex = .2, main="Plot Artificial Data")
 hist(array_artif_2, main = "Histogram Artificial Data")
 ```
