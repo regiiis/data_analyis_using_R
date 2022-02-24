@@ -3,14 +3,17 @@ title: "Groupwork R Bootcamp"
 author: "Felix Bigler, Régis Andréoli"
 date: "2/23/2022"
 output:
+  word_document:
+    toc: yes
+    toc_depth: '4'
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+    number_sections: yes
   html_document:
     toc: yes
     toc_float: yes
     toc_depth: 4
-    number_sections: yes
-  pdf_document:
-    toc: yes
-    toc_depth: '4'
     number_sections: yes
 ---
 

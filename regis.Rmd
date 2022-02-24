@@ -33,6 +33,7 @@ library(mgcv)
 library(lubridate)
 library(BBmisc)
 library(fGarch)
+library(neuralnet)
 ```
 
 # Load Data
@@ -305,22 +306,67 @@ decomp_2 <- stl(ts_artificial_2, s.window = 1/24, t.window = 365)
 plot(decomp_2)
 ```
 
-
 ```{r}
 df_for_gam <- df_plantA_resample
-df_for_gam$weather <- df_weather$radiation_toa
-#df_for_gam$Month <- as.POSIXct(df_plantA_resample$datetime,tz="GMT",format="%H")
-#df_for_gam$Hour <- as.POSIXct(df_plantA_resample$datetime,tz="GMT",format="%H")
-test <- as.POSIXct(df_plantA_resample$datetime, format = "%H")
-test
+df_for_gam$irradiance <- df_weather$radiation_surface
+df_for_gam$temp <- df_weather$temperature
+df_for_gam <-df_for_gam %>%
+ mutate(
+  month = month(datetime),
+  month_label = month(datetime, label=TRUE),
+  hour = hour(datetime),
+  day = day(datetime),
+  year = year(datetime)
+ )
 ```
-
 
 ```{r}
-gam_model_2 <- gam(Generation_kW ~ s(time, k = 24) + s(weather), data = df_plantA_resample)
+gam_model_2 <- gam(Generation_kW ~ s(hour) + s(month) + s(irradiance) + s(temp), data = df_for_gam)
+summary(gam_model_2)
 ```
 
+```{r}
+set.seed(42)
+indices <- createDataPartition(df_for_gam$Generation_kW, p=.8, list = F)
+train <- df_for_gam %>% slice(indices)
+test <- df_for_gam %>% slice(-indices)
+```
 
+```{r}
+gam_model_2 <- gam(Generation_kW ~ s(hour) + s(month) + s(irradiance) + s(temp), data = train)
+summary(gam_model_2)
+```
+
+```{r}
+pred <- predict(gam_model_2, test %>% select(-Generation_kW))
+control <- test$Generation_kW
+```
+
+```{r}
+plot(control, pred, col='orange', cex = .45, pch=20, ylab = "Predicted Hourly Energy Production", xlab = "Real Energy Production")
+abline(0,1)
+sqrt(mean((control - pred)^2))
+```
+
+```{r}
+df_for_gam$air_density <- df_weather$air_density
+df_for_gam$cloud_cover <- df_weather$cloud_cover
+
+set.seed(42)
+indices_2 <- createDataPartition(df_for_gam$Generation_kW, p=.8, list = F)
+train_2 <- df_for_gam %>% slice(indices_2)
+test_2 <- df_for_gam %>% slice(-indices_2)
+
+gam_model_3 <- gam(Generation_kW ~ s(hour) + s(month) + s(irradiance) + s(temp) + s(air_density) + s(cloud_cover), family = "quasi", data = train_2)
+summary(gam_model_3)
+
+pred_2 <- predict(gam_model_3, test_2 %>% select(-Generation_kW))
+control_2 <- test_2$Generation_kW
+
+plot(control_2, pred_2, col='orange', cex = .45, pch=20, ylab = "Predicted Hourly Energy Production", xlab = "Real Energy Production")
+abline(0,1)
+sqrt(mean((control_2 - pred_2)^2))
+```
 
 
 
