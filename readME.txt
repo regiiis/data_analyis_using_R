@@ -1,0 +1,1 @@
+Data sources- PV Plant Data:https://github.com/zuzfil/PV-OptimisationWeather Data:https://www.renewables.ninja/ -> weather data for the city of Aarau in 2019Folder organisationAndroli_Bigler folder > contains of R markdown file and html documentData folder -> contains PV plant data and weather data
