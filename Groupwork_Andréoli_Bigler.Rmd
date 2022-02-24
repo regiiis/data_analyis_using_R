@@ -17,6 +17,10 @@ output:
     toc_depth: '4'
 ---
 
+```{r}
+knitr::opts_chunk$set(error=FALSE,warning=FALSE)
+```
+
 ```{r, echo= FALSE,message=FALSE,warning=FALSE}
 # load library
 library(rstudioapi)
@@ -607,7 +611,7 @@ As last manipulation, the few outliers over a value of 1800 are pulled down. Thi
 noised_years[1,][noised_years[1,] > 1800] <- (as.numeric(noised_years[1,]) * 0.75)
 df_artif_2 <- t(noised_years[1,])
 array_artif_2 <- array(as.numeric(unlist(df_artif_2)))
-par(mfrow=c(2,2))
+par(mfrow=c(2,1))
 plot(array_artif_2, cex = .2, main="Plot Artificial Data")
 hist(array_artif_2, main = "Histogram Artificial Data")
 ```
@@ -644,6 +648,7 @@ df_for_gam <-df_for_gam %>%
  )
 ```
 
+### GAM Result - with Meteo Data
 ```{r}
 gam_model_2 <- gam(Generation_kW ~ s(hour) + s(month) + s(irradiance) + s(temp), data = df_for_gam)
 summary(gam_model_2)
@@ -657,7 +662,6 @@ train <- df_for_gam %>% slice(indices)
 test <- df_for_gam %>% slice(-indices)
 ```
 
-
 ```{r}
 gam_model_2 <- gam(Generation_kW ~ s(hour) + s(month) + s(irradiance) + s(temp), data = train)
 summary(gam_model_2)
@@ -668,7 +672,7 @@ pred <- predict(gam_model_2, test %>% select(-Generation_kW))
 control <- test$Generation_kW
 ```
 
-### GAM with Meteo Data - Result
+### GAM Result - With Train & Test Partition
 ```{r}
 plot(control, pred, col='orange', cex = .45, pch=20, ylab = "Predicted Hourly Energy Production", xlab = "Real Energy Production")
 abline(0,1)
